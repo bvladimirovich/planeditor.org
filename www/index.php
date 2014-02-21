@@ -29,12 +29,33 @@
     }
 </script>
 
+<script id="shader-fs-grid" type="x-shader/x-fragment">
+    precision mediump float;
+	uniform vec4 uColor;
+
+    void main(void) {
+        gl_FragColor = uColor;
+    }
+</script>
+
+<script id="shader-vs-grid" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+
+    uniform mat4 uMMatrix;
+    uniform mat4 uPVMatrix;
+
+    void main(void) {
+        gl_Position = uPVMatrix * uMMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
+
 <script>
     function webGLStart() {
         var canvas = document.getElementById("canvas");
         initGL(canvas);
         initShaders();
         initBuffers();
+		initBuffersGrid();
 		initBuffersBorder();
 		initScene(canvas);
 		initMove();
