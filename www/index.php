@@ -3,11 +3,11 @@
 <head>
 <title>Editor</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<script src="other/js/glMatrix-0.9.5.min.js"></script>
-<script src="other/js/jquery-2.0.3.min.js"></script>
-<script src="project/js/struct.js"></script>
-<script src="project/js/wgl.js"></script>
-<script src="project/js/main.js"></script>
+<script src="js/other/glMatrix-0.9.5.min.js"></script>
+<script src="js/other/jquery-2.0.3.min.js"></script>
+<script src="js/project/struct.js"></script>
+<script src="js/project/wgl.js"></script>
+<script src="js/project/main.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
