@@ -272,24 +272,15 @@ Building.prototype.getItem = function(idItem){	// получение списк�
 }
 Building.prototype.updateItem = function (item) {	// обновление параметров элементов
 	Building.list[item.id] = new Struct().set(item.id, item.type, item.x, item.y, item.z, item.lx, item.ly, item.lz);
-	this.errorItem = {};
+	var error = false;
 	for (var i in Building.list) {
 		if (item.id != i && isIntersects(item, Building.list[i])) {	// проверка, не создаёт ли помех элемент с новыми параметрами	
 																	// существующим
-			this.errorItem[i] = Building.list[i];
+			error = true;
 		}
 	}
-	var count = 0;
-	for (var i in this.errorItem) {
-		count++;
-	}
-	if (count > 0) {
-		return true; // возвращает true, если элемент создаёт помехи
-	}
+	return error;
 }
-Building.prototype.getErrorItem = function () {		// возвращает элементы, с которыми пересекается активный элемент
-	return this.errorItem;
-};
 
 
 /**
