@@ -282,12 +282,12 @@ function initScene(elem) {
 		var graph = new Graph();
 
 		function Draggable() {
-			var	currentItem = undefined;
+			var	currentItem = undefined,
+				sideChanges = undefined;
 			
 			var moveCamera = false,
 				moveItem = false,
-				resizeItem = false,
-				sideChanges = undefined;
+				resizeItem = false;
 			
 			var prevXd,
 				prevZd,
@@ -387,6 +387,8 @@ function initScene(elem) {
 
 							highlightedItems.add(currentItem.id);							
 							selectedGraph(currentItem, graph);
+
+							showParameters(currentItem);
 						}
 					} else {
 						highlightedItems.clear();
@@ -606,6 +608,10 @@ function initScene(elem) {
 						}
 					}
 				}
+				
+				if (moveItem || resizeItem) {
+					showParameters(currentItem);
+				}
 			}
 			this.mouseup = function (ev) {
 				if (moveCamera) {
@@ -626,7 +632,7 @@ function initScene(elem) {
 							console.info('Удален элеменет "' + deletedItem.type + '"', deletedItem);
 						}
 					}
-				} 
+				}
 				
 				drawScene(cameraControl, highlightedItems, highlightColor);
 				
@@ -642,6 +648,18 @@ function initScene(elem) {
 				}
 			}
 		}
+		
+		function showParameters(currentItem) {
+			$('#id').val(currentItem.id);
+			$('#type').val(currentItem.type);
+			$('#lx').val(currentItem.lx.toFixed(2));
+			$('#ly').val(currentItem.ly.toFixed(2));
+			$('#lz').val(currentItem.lz.toFixed(2));
+			$('#x').val(currentItem.x.toFixed(2));
+			$('#y').val(currentItem.y.toFixed(2));
+			$('#z').val(currentItem.z.toFixed(2));
+		}
+		
 			
 		/* Функция определения координат мыши на холсте */
 		// defineMousePosition
