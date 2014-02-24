@@ -62,23 +62,54 @@
     }
 </script>
 <style>
-	div{
+	.alignment-left{
 		float: left;
 	}
 </style>
 </head>
 <body onload="webGLStart();">
-    <div>
-		<canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+    <div class='alignment-left'>
+		<canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
 	</div>
-	<div style='width:30px; height:500px;'></div>
-	<div>
-		lx: <input id='lx' type='text' size='5'>
-		ly: <input id='ly' type='text' size='5'>
-		lz: <input id='lz' type='text' size='5'>
-		<br>
-		<button id='addRoom'>Применить размеры</button>
-	</div>
+	<div class='alignment-left' style='width:30px; height:500px;'></div>
+	<div class='alignment-left'>
+		<div>
+			Информация: <br>
+			ID: <input id='id' type='text' size='5'> <br>
+			Type: <input id='type' type='text' size='5'> <br>
+			Size: 
+			[ 
+			lx: <input id='lx' type='text' size='5'>
+			ly: <input id='ly' type='text' size='5'>
+			lz: <input id='lz' type='text' size='5'>
+			] <br>
+			Position: 
+			[ 
+			x: <input id='x' type='text' size='5'>
+			y: <input id='y' type='text' size='5'>
+			z: <input id='z' type='text' size='5'>
+			]
+			<br>
+		</div>
+		<div style='width:100%; height:30px;'></div>
+		<div>
+			<button id='saveProject'>Сохранить проект</button>
+			<button id='openProject'>Открыть проект</button>
+		</div>
+		<div style='width:100%; height:30px;'></div>
+		<div>
+			<input type='checkbox' name='autosave'> Автосохранение
+		</div>
+		<div style='width:100%; height:30px;'></div>
+		<div>
+			<button id='upload'>Загрузить подложку</button>
+		</div>
+		<div style='width:100%; height:30px;'></div>
+		<div>
+			<button id='addFloor'>Добавить этаж</button> 
+			<button id='removeFloor'>Удалить этаж</button>
+		</div>
+	</div>	
 </body>
 
 </html>
