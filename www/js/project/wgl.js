@@ -57,8 +57,8 @@ var shaderProgram;
 var shaderProgramGrid;
 
 function initShaders() {
-	shaderProgramGrid = setShaders('shader-fs-grid', 'shader-vs-grid');
-	//shaderProgram = setShaders('shader-fs', 'shader-vs');
+	//shaderProgramGrid = setShaders('shader-fs-grid', 'shader-vs-grid');
+	shaderProgram = setShaders('shader-fs', 'shader-vs');
 	
 	function setShaders(shaderFS, shaderVS) {
 		var fragmentShader = getShader(gl, shaderFS);
@@ -146,54 +146,54 @@ function drawScene(cam, selectedItems, highlightColor) {
     mat4.ortho(cam.get().l, cam.get().r, cam.get().b, cam.get().t, 0.1, 100.0, pvMatrix);
 	mat4.rotateX(pvMatrix, Math.PI/2.0);
 	
-	mat4.identity(mMatrix);
-	gl.bindBuffer(gl.ARRAY_BUFFER, gridVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgramGrid.vertexPositionAttribute, gridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	gl.uniformMatrix4fv(shaderProgramGrid.pvMatrixUniform, false, pvMatrix);
-	gl.uniformMatrix4fv(shaderProgramGrid.mMatrixUniform, false, mMatrix);
-	gl.uniform4fv(shaderProgramGrid.uColor, [1.0, 1.0, 1.0, 1.0]);
-	gl.drawArrays(gl.LINES, 0, gridVertexPositionBuffer.numItems);
+	// mat4.identity(mMatrix);
+	// gl.bindBuffer(gl.ARRAY_BUFFER, gridVertexPositionBuffer);
+	// gl.vertexAttribPointer(shaderProgramGrid.vertexPositionAttribute, gridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	// gl.uniformMatrix4fv(shaderProgramGrid.pvMatrixUniform, false, pvMatrix);
+	// gl.uniformMatrix4fv(shaderProgramGrid.mMatrixUniform, false, mMatrix);
+	// gl.uniform4fv(shaderProgramGrid.uColor, [1.0, 1.0, 1.0, 1.0]);
+	// gl.drawArrays(gl.LINES, 0, gridVertexPositionBuffer.numItems);
 	
-	// for (var i in build.getItem()){
-		// var item = build.getItem(i);
-		// if (item === undefined) continue;
-		// var	dx = item.x + item.lx * 0.5,
-			// dz = item.z + item.lz * 0.5,
-			// sx = item.lx * 0.5,
-			// sz = item.lz * 0.5;
+	for (var i in build.getItem()){
+		var item = build.getItem(i);
+		if (item === undefined) continue;
+		var	dx = item.x + item.lx * 0.5,
+			dz = item.z + item.lz * 0.5,
+			sx = item.lx * 0.5,
+			sz = item.lz * 0.5;
 		
-		// if (item.type == 'door') {
-			// var uColor = [1.0, 0.5, 0.0, 1.0];
-		// } else {
-			// var uColor = [1.0, 1.0, 0.7, 1.0];
-		// }
+		if (item.type == 'door') {
+			var uColor = [1.0, 0.5, 0.0, 1.0];
+		} else {
+			var uColor = [1.0, 1.0, 0.7, 1.0];
+		}
 		
-		// mat4.identity(mMatrix);
-		// mat4.translate(mMatrix, [dx, -0.2, dz]);
-		// mat4.scale(mMatrix, [sx, 1.0, sz]);
+		mat4.identity(mMatrix);
+		mat4.translate(mMatrix, [dx, -0.2, dz]);
+		mat4.scale(mMatrix, [sx, 1.0, sz]);
 
-		// gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-		// gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		// gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
-		// gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-		// gl.uniform4fv(shaderProgram.uColor, uColor);
-		// gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+		gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
+		gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
+		gl.uniform4fv(shaderProgram.uColor, uColor);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
 		
 		
 		
-		// if (selectedItems.has(item.id)) {
-			// mat4.identity(mMatrix);
-			// mat4.translate(mMatrix, [dx, -0.1, dz]);
-			// mat4.scale(mMatrix, [sx, 1.0, sz]);
+		if (selectedItems.has(item.id)) {
+			mat4.identity(mMatrix);
+			mat4.translate(mMatrix, [dx, -0.1, dz]);
+			mat4.scale(mMatrix, [sx, 1.0, sz]);
 			
-			// gl.bindBuffer(gl.ARRAY_BUFFER, borderVertexPositionBuffer);
-			// gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, borderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-			// gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
-			// gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-			// gl.uniform4fv(shaderProgram.uColor, highlightColor.get());
-			// gl.drawArrays(gl.LINE_STRIP, 0, borderVertexPositionBuffer.numItems);
-		// }
-	// }
+			gl.bindBuffer(gl.ARRAY_BUFFER, borderVertexPositionBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, borderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
+			gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
+			gl.uniform4fv(shaderProgram.uColor, highlightColor.get());
+			gl.drawArrays(gl.LINE_STRIP, 0, borderVertexPositionBuffer.numItems);
+		}
+	}
 }
 
 /**
