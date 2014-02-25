@@ -281,6 +281,16 @@ Building.prototype.updateItem = function (item) {	// обновление пар
 	}
 	return error;
 }
+Building.prototype.readBuildingFromFile = function (response) {		// response - json файл
+	var id;
+	for (id in response) {
+		var item = response[id];
+		var b = new Struct().set(id, item.type, parseFloat(item.x), parseFloat(item.y), parseFloat(item.z), 
+									parseFloat(item.lx), parseFloat(item.ly), parseFloat(item.lz));
+		Building.list[id] = b;
+	}
+	Building.ID = parseInt(id) + 1;
+}
 
 
 /**
@@ -449,6 +459,13 @@ Graph.prototype.remove = function (N) {
 	}
 	return result;
 }
+Graph.prototype.readGraphsFromFile = function (response) {
+	console.log(response);
+	for (var i in response) {
+		
+	}
+	
+};
 
 /** Множество не повторяющихся элементов */
 var Set = function () {

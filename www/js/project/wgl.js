@@ -209,6 +209,7 @@ var cameraControl;
 var highlightedItems;
 var highlightColor;
 var build;
+var graph;
 function initScene(elem) {
 	console.time('Загрузка initScene()');
 	
@@ -279,7 +280,7 @@ function initScene(elem) {
 		}
 		
 		var previousSettingsItem = new OldItem();
-		var graph = new Graph();
+		graph = new Graph();
 
 		function Draggable() {
 			var	currentItem = undefined,
@@ -414,6 +415,7 @@ function initScene(elem) {
 					function selectedGraph (currentItem, graph) {
 						console.time('TimeWorkGraph');
 						var currentItemID = currentItem.id;
+						
 						if (graph.isEdge(currentItemID)) {
 							currentItemID = graph.getNode(currentItemID)[0];
 						}
@@ -422,6 +424,7 @@ function initScene(elem) {
 							for (var i = g.length; --i >= 0;) {
 								if (!highlightedItems.has(g[i])) {
 									highlightedItems.add(g[i]);
+									
 								}
 							}
 							for (var i = g.length; --i >= 0;) {
