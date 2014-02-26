@@ -335,6 +335,7 @@ function initScene(elem) {
 						isMoveItem();
 						isResizeItem();
 						previousSettingsItem.setOldItem(currentItem);
+						definingNeighbors(build.getItem(), graph, currentItem);
 						
 						var arrayItems = highlightedItems.valueOf();
 						if (key.getKeyCode() == keyCode.SHIFT) {
@@ -659,7 +660,7 @@ function initScene(elem) {
 			$('#z').val(currentItem.z.toFixed(2));
 		}
 		
-			
+		
 		/* Функция определения координат мыши на холсте */
 		// defineMousePosition
 		function fs(ev, p) {
@@ -734,6 +735,25 @@ function initScene(elem) {
 			var item1 = build.getItem(e[1]);
 			var borderDoor = new Section().get(item0, item1, build.getItem());
 			return borderDoor;
+		}
+		
+		function definingNeighbors(building, graph, currentItem) {
+			var nodesOfGraphTotal = graph.getGraph(currentItem.id).length;
+			console.log('количество вершин в графе:', nodesOfGraphTotal);
+			if (nodesOfGraphTotal > 1) {
+				if (currentItem.type !== 'room') return
+				var arrDoorsId = graph.getEdge(currentItem.id);
+				var doorsOfRoomTotal = arrDoorsId.length;
+				
+				console.log('выбрана комната', currentItem.id);
+				console.log('у этой комнаты дверей:', doorsOfRoomTotal, 'шт');
+				console.log('идентификаторы дверей:', arrDoorsId);
+				
+				for (var i = doorsOfRoomTotal; --i >= 0;) {
+					var door = build.getItem(arrDoorsId[i]);
+					console.log('объекты дверей:', door);					
+				}
+			}
 		}
 	}
 	console.timeEnd('Загрузка initScene()');
