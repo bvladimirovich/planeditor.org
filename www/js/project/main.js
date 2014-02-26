@@ -1,19 +1,24 @@
 function initMove () {
 	
 	$('#saveProject').click(function (e) {
-		var gr = {};
+		var objForSave = {};
 		for (var i in build.getItem()) {
 			if (graph.getGraph(i).length > 1) {
-				gr[i] = graph.getGraph(i);
+				for (var l = graph.getGraph(i).length; --l >= 0;) {
+					for (var j = graph.getEdge(graph.getGraph(i)[l]).length; --j >=0;) {
+						var node1 = i;
+						var edge = graph.getEdge(graph.getGraph(node1)[l])[j];
+						objForSave[edge] = graph.getNode(edge);
+					}
+				}
 			}
 		}
-		console.log(gr);
 		$.ajax({
 			url: 'cgi-php/saveProject.php',
 			type: 'post',
 			data: {
 				build: build.getItem(),
-				graph: gr,
+				graph: objForSave,
 			},
 			success: function (data, code) {
 				console.info(code); // запрос успешно прошёл
@@ -31,7 +36,6 @@ function initMove () {
 			type: 'post',
 			dataType: 'json',
 			success: function (response, code) {
-				console.log(response);
 				build.readBuildingFromFile(response);
 				drawScene(cameraControl, highlightedItems, highlightColor);
 			},

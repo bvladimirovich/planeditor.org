@@ -460,11 +460,9 @@ Graph.prototype.remove = function (N) {
 	return result;
 }
 Graph.prototype.readGraphsFromFile = function (response) {
-	console.log(response);
 	for (var i in response) {
-		
+		this.add(i, parseInt(response[i][0]), parseInt(response[i][1]));
 	}
-	
 };
 
 /** Множество не повторяющихся элементов */
