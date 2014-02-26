@@ -229,10 +229,6 @@ function initScene(elem) {
 	});
 	
 	build = new Building();
-	build.addRoom(0.0,0.1,0.0, 0.6,1.0,0.6);
-	build.addRoom(5.0,0.1,0.0, 0.6,1.0,0.6);
-	build.addRoom(0.0,0.1,5.0, 2.0,1.0,2.0);
-	build.addRoom(5.0,0.1,5.0, 2.0,1.0,2.0);
 	
 	var key = new Keyboard();
 	
@@ -741,4 +737,66 @@ function initScene(elem) {
 		}
 	}
 	console.timeEnd('Загрузка initScene()');
+}
+
+function initNavigation() {
+	$('#saveProject').click(function () {
+		var objForSave = {};
+		for (var item in build.getItem()) {
+			var graphForSave = graph.getGraph(item);
+			if (graphForSave.length < 2) continue;
+			
+			for (var node = graphForSave.length; --node >= 0;) {
+				var arrEdges = graph.getEdge(graphForSave[node])
+				for (var j = arrEdges.length; --j >=0;) {
+					var edge = arrEdges[j];
+					objForSave[edge] = graph.getNode(edge);
+				}
+			}		
+		}
+		
+		$.ajax({
+			url: 'cgi-php/saveProject.php',
+			type: 'post',
+			data: {
+				build: build.getItem(),
+				graph: objForSave,
+			},
+			success: function (data, code) {
+				console.info(code); // запрос успешно прошёл
+				drawScene(cameraControl, highlightedItems, highlightColor);
+			},
+			error: function(xhr, str) {
+				console.error('Критическая ошибка', str);
+			}
+		});
+	});
+	
+	$('#openProject').click(function () {
+		$.ajax({
+			url: 'cgi-php/openProjectBuild.php',
+			type: 'post',
+			dataType: 'json',
+			success: function (response, code) {
+				build.readBuildingFromFile(response);
+				drawScene(cameraControl, highlightedItems, highlightColor);
+			},
+			error: function(xhr, str) {
+				 console.error('Критическая ошибка', str); 
+			}
+		});
+		
+		$.ajax({
+			url: 'cgi-php/openProjectGraph.php',
+			type: 'post',
+			dataType: 'json',
+			success: function (response, code) {
+				graph.readGraphsFromFile(response);
+				drawScene(cameraControl, highlightedItems, highlightColor);
+			},
+			error: function(xhr, str) {
+				 console.error('Критическая ошибка', str); 
+			}
+		});
+	});
 }

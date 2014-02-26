@@ -58,6 +58,7 @@
 		initBuffersGrid();
 		initBuffersBorder();
 		initScene(canvas);
+		initNavigation();
 		initMove();
     }
 </script>
