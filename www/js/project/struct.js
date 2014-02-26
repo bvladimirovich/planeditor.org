@@ -461,7 +461,7 @@ Graph.prototype.remove = function (N) {
 }
 Graph.prototype.readGraphsFromFile = function (response) {
 	for (var i in response) {
-		this.add(i, parseInt(response[i][0]), parseInt(response[i][1]));
+		this.add(parseInt(i), parseInt(response[i][0]), parseInt(response[i][1]));
 	}
 };
 
