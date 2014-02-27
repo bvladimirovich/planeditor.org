@@ -335,7 +335,9 @@ function initScene(elem) {
 						isMoveItem();
 						isResizeItem();
 						previousSettingsItem.setOldItem(currentItem);
-						definingNeighbors(build.getItem(), graph, currentItem);
+						var boxItems = {};
+						definingNeighbors(build.getItem(), graph, currentItem, boxItems);
+						console.warn(boxItems);
 						
 						var arrayItems = highlightedItems.valueOf();
 						if (key.getKeyCode() == keyCode.SHIFT) {
@@ -737,21 +739,59 @@ function initScene(elem) {
 			return borderDoor;
 		}
 		
-		function definingNeighbors(building, graph, currentItem) {
+		function definingNeighbors(building, graph, currentItem, boxItems) {
 			var nodesOfGraphTotal = graph.getGraph(currentItem.id).length;
-			console.log('количество вершин в графе:', nodesOfGraphTotal);
 			if (nodesOfGraphTotal > 1) {
 				if (currentItem.type !== 'room') return
 				var arrDoorsId = graph.getEdge(currentItem.id);
 				var doorsOfRoomTotal = arrDoorsId.length;
 				
-				console.log('выбрана комната', currentItem.id);
-				console.log('у этой комнаты дверей:', doorsOfRoomTotal, 'шт');
-				console.log('идентификаторы дверей:', arrDoorsId);
-				
+				var boxLeftItems = new Set();
+				var boxRightItems = new Set();
+				var boxTopItems = new Set();
+				var boxButtomItems = new Set();
+
 				for (var i = doorsOfRoomTotal; --i >= 0;) {
 					var door = build.getItem(arrDoorsId[i]);
-					console.log('объекты дверей:', door);					
+					currentItem.center = {	// координаты центра элемента a
+						x: currentItem.x + currentItem.lx/2.0,
+						y: currentItem.y + currentItem.ly/2.0,
+						z: currentItem.z + currentItem.lz/2.0
+					};
+					door.center = {	// координаты центра элемента b
+						x: door.x + door.lx/2.0,
+						y: door.y + door.ly/2.0,
+						z: door.z + door.lz/2.0
+					};
+					
+					var dx = currentItem.center.x - door.center.x,	// расстояние между центрами
+						dy = currentItem.center.y - door.center.y,	// входящими элементов
+						dz = currentItem.center.z - door.center.z;
+
+					if (dx < 0) {
+						if (currentItem.x1 == door.x) {
+							boxRightItems.add(door.id);
+							boxItems.RIGHT = boxRightItems.valueOf();
+						}
+					} else if (dx > 0) {
+						if (currentItem.x == door.x1) {
+							boxLeftItems.add(door.id);
+							boxItems.LEFT = boxLeftItems.valueOf();
+						}
+					}
+					
+					if (dz < 0) {
+						if (currentItem.z1 == door.z) {
+							boxButtomItems.add(door.id);
+							boxItems.BOTTOM = boxButtomItems.valueOf();
+						}
+					} else if (dz > 0) {
+						if (currentItem.z == door.z1) {
+							boxTopItems.add(door.id);
+							boxItems.TOP = boxTopItems.valueOf();
+						}
+					}
+					
 				}
 			}
 		}
