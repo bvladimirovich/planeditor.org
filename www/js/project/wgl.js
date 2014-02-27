@@ -290,7 +290,9 @@ function initScene(elem) {
 				prevZd,
 				prevXm,
 				prevZm; 
-				
+			
+			var boxItems;
+			
 			var keyCode = {
 				SHIFT: 16,
 				CTRL: 17,
@@ -335,7 +337,8 @@ function initScene(elem) {
 						isMoveItem();
 						isResizeItem();
 						previousSettingsItem.setOldItem(currentItem);
-						var boxItems = {};
+						
+						boxItems = {};
 						definingNeighbors(build.getItem(), graph, currentItem, boxItems);
 						console.warn(boxItems);
 						
@@ -482,9 +485,25 @@ function initScene(elem) {
 											currentItem.lx = dlx;
 										}
 									}
+								} if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
+									console.log('Изменение размеров комнаты в графе');
+									if (boxItems.LEFT === undefined) {
+										currentItem.x = x;
+										currentItem.lx = dlx;									
+									} else {
+										currentItem.x = x;
+										currentItem.lx = dlx;
+										for (var i = boxItems.LEFT.length; --i >= 0;) {
+											/* ---------------- */
+											var m_door = build.getItem(boxItems.LEFT[i]);
+											m_door.x1 = x;
+											m_door.lx = m_door.lx - (currentItem.x - x);
+											console.log(m_door.x1, m_door.lx);
+										}
+									}
 								} else {
-									currentItem.lx = dlx;
 									currentItem.x = x;
+									currentItem.lx = dlx;
 								}
 							}
 							break;
@@ -753,19 +772,19 @@ function initScene(elem) {
 
 				for (var i = doorsOfRoomTotal; --i >= 0;) {
 					var door = build.getItem(arrDoorsId[i]);
-					currentItem.center = {	// координаты центра элемента a
+					currentItem.center = {
 						x: currentItem.x + currentItem.lx/2.0,
 						y: currentItem.y + currentItem.ly/2.0,
 						z: currentItem.z + currentItem.lz/2.0
 					};
-					door.center = {	// координаты центра элемента b
+					door.center = {
 						x: door.x + door.lx/2.0,
 						y: door.y + door.ly/2.0,
 						z: door.z + door.lz/2.0
 					};
 					
 					var dx = currentItem.center.x - door.center.x,	// расстояние между центрами
-						dy = currentItem.center.y - door.center.y,	// входящими элементов
+						dy = currentItem.center.y - door.center.y,	// элементов
 						dz = currentItem.center.z - door.center.z;
 
 					if (dx < 0) {
