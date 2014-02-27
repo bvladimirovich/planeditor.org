@@ -498,6 +498,13 @@ Set.prototype.clear = function (N) {	// очистка массива
 Set.prototype.valueOf = function () {	// получение всего массива
 	return this.set;
 };
+Set.prototype.isEmpty = function () {
+	if (this.set.length == 0) {
+		return true;
+	} else {
+		return false;
+	}
+};
 
 var Item = function () {
 	this.item = undefined;
