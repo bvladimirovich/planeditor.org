@@ -481,29 +481,23 @@ function initScene(elem) {
 									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
 									if (borderDoor.distance.x == 0) {
 										if (x > borderDoor.x) {
-											currentItem.x = x;
-											currentItem.lx = dlx;
+											changeCurrentItem(currentItem, {x: x, lx: dlx});
 										}
 									}
-								} if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
-									console.log('Изменение размеров комнаты в графе');
+								} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
 									if (boxItems.LEFT === undefined) {
-										currentItem.x = x;
-										currentItem.lx = dlx;									
+										changeCurrentItem(currentItem, {x: x, lx: dlx});
 									} else {
-										currentItem.x = x;
-										currentItem.lx = dlx;
+										changeCurrentItem(currentItem, {x: x, lx: dlx});
 										for (var i = boxItems.LEFT.length; --i >= 0;) {
-											/* ---------------- */
 											var m_door = build.getItem(boxItems.LEFT[i]);
 											m_door.x1 = x;
-											m_door.lx = m_door.lx - (currentItem.x - x);
-											console.log(m_door.x1, m_door.lx);
+											m_door.lx = m_door.x1 - m_door.x;
+											build.updateItem(m_door);
 										}
 									}
 								} else {
-									currentItem.x = x;
-									currentItem.lx = dlx;
+									changeCurrentItem(currentItem, {x: x, lx: dlx});
 								}
 							}
 							break;
@@ -514,13 +508,24 @@ function initScene(elem) {
 									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
 									if (borderDoor.distance.x == 0) {
 										if (x < borderDoor.x + borderDoor.lx) {
-											currentItem.lx = dlx;
-											currentItem.x1 = x;
+											changeCurrentItem(currentItem, {x1: x, lx: dlx});
+										}
+									}
+								} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
+									if (boxItems.RIGHT === undefined) {
+										changeCurrentItem(currentItem, {x1: x, lx: dlx});
+									} else {
+										/* ------------- */
+										changeCurrentItem(currentItem, {x1: x, lx: dlx});
+										for (var i = boxItems.RIGHT.length; --i >= 0;) {
+											var m_door = build.getItem(boxItems.RIGHT[i]);
+											m_door.x = x;
+											m_door.lx = m_door.x1 - m_door.x;
+											build.updateItem(m_door);
 										}
 									}
 								} else {
-									currentItem.lx = dlx;
-									currentItem.x1 = x;
+									changeCurrentItem(currentItem, {x1: x, lx: dlx});
 								}
 							}
 							break;
@@ -632,6 +637,12 @@ function initScene(elem) {
 				
 				if (moveItem || resizeItem) {
 					showParameters(currentItem);
+				}
+				
+				function changeCurrentItem(currentItem, obj) {
+					for (var i in obj) {
+						currentItem[i] = obj[i];
+					}
 				}
 			}
 			this.mouseup = function (ev) {
