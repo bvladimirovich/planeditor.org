@@ -7,6 +7,7 @@
 <script src="js/other/jquery-2.0.3.min.js"></script>
 <script src="js/project/struct.js"></script>
 <script src="js/project/wgl.js"></script>
+<script src="js/project/modules.js"></script>
 <script src="js/project/main.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">

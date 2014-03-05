@@ -476,62 +476,59 @@ function initScene(elem) {
 					switch (sideChanges) {
 						case 'left': // изменяем размер влево
 							dlx = currentItem.lx + (currentItem.x - x);
-							if (!(dlx > minSize.lx)) return;
+							if (!(dlx > minSize.lx)) break;
 							
-							if (currentItem.type == 'door') {
-								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-								if (borderDoor.distance.x == 0) {
-									if (x > borderDoor.x) {
+							if (IsSimpleItem(currentItem, graph)) {
+								changeCurrentItem(currentItem, {x: x, lx: dlx});
+							} else {
+								if (currentItem.type == 'room') {
+									if (boxItems.LEFT !== undefined) {
+										changeCurrentItem(currentItem, {x: x, lx: dlx});
+										
+										for (var i = boxItems.LEFT.length; --i >= 0;) {
+											var m_door = build.getItem(boxItems.LEFT[i]);
+											m_door.x1 = x;
+											m_door.lx = m_door.x1 - m_door.x;
+											build.updateItem(m_door);
+										}
+									} else {
 										changeCurrentItem(currentItem, {x: x, lx: dlx});
 									}
+								} else if (currentItem.type == 'door') {
+									// делать что-то, если выбрана дверь
 								}
-							} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
-								if (boxItems.LEFT === undefined) {
-									changeCurrentItem(currentItem, {x: x, lx: dlx});
-								} else {
-									changeCurrentItem(currentItem, {x: x, lx: dlx});
-									for (var i = boxItems.LEFT.length; --i >= 0;) {
-										var m_door = build.getItem(boxItems.LEFT[i]);
-										m_door.x1 = x;
-										m_door.lx = m_door.x1 - m_door.x;
-										build.updateItem(m_door);
-									}
-								}
-							} else {
-								changeCurrentItem(currentItem, {x: x, lx: dlx});
 							}
 							break;
 						case 'right': // изменяем размер вправо
 							dlx = currentItem.lx + (x - currentItem.x1);
-							if (!(dlx > minSize.lx)) return;
-							
-							if (currentItem.type == 'door') {
-								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-								if (borderDoor.distance.x == 0) {
-									if (x < borderDoor.x + borderDoor.lx) {
+							if (!(dlx > minSize.lx)) break;
+
+							if (IsSimpleItem(currentItem, graph)) {
+								changeCurrentItem(currentItem, {x1: x, lx: dlx});
+							} else {
+								if (currentItem.type == 'room') {
+									if (boxItems.RIGHT !== undefined) {
+										changeCurrentItem(currentItem, {x1: x, lx: dlx});
+										
+										for (var i = boxItems.RIGHT.length; --i >= 0;) {
+											var m_door = build.getItem(boxItems.RIGHT[i]);
+											// если поменять строчки 1 и 2 местами
+											// не будет работать изменение размера зависимого объекта
+											m_door.lx = m_door.lx + (m_door.x - x);	// 1
+											m_door.x = x;							// 2
+											build.updateItem(m_door);
+										}
+									} else {
 										changeCurrentItem(currentItem, {x1: x, lx: dlx});
 									}
+								} else if (currentItem.type == 'door') {								
+									// делать что-то, если выбрана дверь
 								}
-							} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
-								if (boxItems.RIGHT === undefined) {
-									changeCurrentItem(currentItem, {x1: x, lx: dlx});
-								} else {
-									/* ------------- */
-									changeCurrentItem(currentItem, {x1: x, lx: dlx});
-									for (var i = boxItems.RIGHT.length; --i >= 0;) {
-										var m_door = build.getItem(boxItems.RIGHT[i]);
-										m_door.x = x;
-										m_door.lx = m_door.x1 - m_door.x;
-										build.updateItem(m_door);
-									}
-								}
-							} else {
-								changeCurrentItem(currentItem, {x1: x, lx: dlx});
 							}
 							break;
 						case 'top': // изменяем размер вверх
 							dlz = currentItem.lz + (currentItem.z - z);
-							if (!(dlz > minSize.lz)) return;
+							if (!(dlz > minSize.lz)) break;
 
 							if (currentItem.type == 'door') {
 								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
@@ -548,7 +545,7 @@ function initScene(elem) {
 							break;
 						case 'bottom': // изменяем размер вниз
 							dlz = currentItem.lz + (z - currentItem.z1);
-							if (!(dlz > minSize.lz)) return;
+							if (!(dlz > minSize.lz)) break;
 
 							if (currentItem.type == 'door') {
 								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
