@@ -476,139 +476,139 @@ function initScene(elem) {
 					switch (sideChanges) {
 						case 'left': // изменяем размер влево
 							dlx = currentItem.lx + (currentItem.x - x);
-							if (dlx > minSize.lx) {
-								if (currentItem.type == 'door') {
-									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-									if (borderDoor.distance.x == 0) {
-										if (x > borderDoor.x) {
-											changeCurrentItem(currentItem, {x: x, lx: dlx});
-										}
-									}
-								} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
-									if (boxItems.LEFT === undefined) {
+							if (!(dlx > minSize.lx)) return;
+							
+							if (currentItem.type == 'door') {
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								if (borderDoor.distance.x == 0) {
+									if (x > borderDoor.x) {
 										changeCurrentItem(currentItem, {x: x, lx: dlx});
-									} else {
-										changeCurrentItem(currentItem, {x: x, lx: dlx});
-										for (var i = boxItems.LEFT.length; --i >= 0;) {
-											var m_door = build.getItem(boxItems.LEFT[i]);
-											m_door.x1 = x;
-											m_door.lx = m_door.x1 - m_door.x;
-											build.updateItem(m_door);
-										}
 									}
+								}
+							} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
+								if (boxItems.LEFT === undefined) {
+									changeCurrentItem(currentItem, {x: x, lx: dlx});
 								} else {
 									changeCurrentItem(currentItem, {x: x, lx: dlx});
+									for (var i = boxItems.LEFT.length; --i >= 0;) {
+										var m_door = build.getItem(boxItems.LEFT[i]);
+										m_door.x1 = x;
+										m_door.lx = m_door.x1 - m_door.x;
+										build.updateItem(m_door);
+									}
 								}
+							} else {
+								changeCurrentItem(currentItem, {x: x, lx: dlx});
 							}
 							break;
 						case 'right': // изменяем размер вправо
 							dlx = currentItem.lx + (x - currentItem.x1);
-							if (dlx > minSize.lx) {
-								if (currentItem.type == 'door') {
-									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-									if (borderDoor.distance.x == 0) {
-										if (x < borderDoor.x + borderDoor.lx) {
-											changeCurrentItem(currentItem, {x1: x, lx: dlx});
-										}
-									}
-								} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
-									if (boxItems.RIGHT === undefined) {
+							if (!(dlx > minSize.lx)) return;
+							
+							if (currentItem.type == 'door') {
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								if (borderDoor.distance.x == 0) {
+									if (x < borderDoor.x + borderDoor.lx) {
 										changeCurrentItem(currentItem, {x1: x, lx: dlx});
-									} else {
-										/* ------------- */
-										changeCurrentItem(currentItem, {x1: x, lx: dlx});
-										for (var i = boxItems.RIGHT.length; --i >= 0;) {
-											var m_door = build.getItem(boxItems.RIGHT[i]);
-											m_door.x = x;
-											m_door.lx = m_door.x1 - m_door.x;
-											build.updateItem(m_door);
-										}
 									}
-								} else {
-									changeCurrentItem(currentItem, {x1: x, lx: dlx});
 								}
+							} else if (currentItem.type == 'room' && graph.getGraph(currentItem.id).length > 1){
+								if (boxItems.RIGHT === undefined) {
+									changeCurrentItem(currentItem, {x1: x, lx: dlx});
+								} else {
+									/* ------------- */
+									changeCurrentItem(currentItem, {x1: x, lx: dlx});
+									for (var i = boxItems.RIGHT.length; --i >= 0;) {
+										var m_door = build.getItem(boxItems.RIGHT[i]);
+										m_door.x = x;
+										m_door.lx = m_door.x1 - m_door.x;
+										build.updateItem(m_door);
+									}
+								}
+							} else {
+								changeCurrentItem(currentItem, {x1: x, lx: dlx});
 							}
 							break;
 						case 'top': // изменяем размер вверх
 							dlz = currentItem.lz + (currentItem.z - z);
-							if (dlz > minSize.lz) {
-								if (currentItem.type == 'door') {
-									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-									if (borderDoor.distance.z == 0) {
-										if (z > borderDoor.z) {
-											currentItem.lz = dlz;
-											currentItem.z = z;
-										}
+							if (!(dlz > minSize.lz)) return;
+
+							if (currentItem.type == 'door') {
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								if (borderDoor.distance.z == 0) {
+									if (z > borderDoor.z) {
+										currentItem.lz = dlz;
+										currentItem.z = z;
 									}
-								} else {
-									currentItem.lz = dlz;
-									currentItem.z = z;
 								}
+							} else {
+								currentItem.lz = dlz;
+								currentItem.z = z;
 							}
 							break;
 						case 'bottom': // изменяем размер вниз
 							dlz = currentItem.lz + (z - currentItem.z1);
-							if (dlz > minSize.lz) {
-								if (currentItem.type == 'door') {
-									var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
-									if (borderDoor.distance.z == 0) {
-										if (z < borderDoor.z + borderDoor.lz) {
-											currentItem.lz = dlz;
-											currentItem.z1 = z;
-										}
+							if (!(dlz > minSize.lz)) return;
+
+							if (currentItem.type == 'door') {
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								if (borderDoor.distance.z == 0) {
+									if (z < borderDoor.z + borderDoor.lz) {
+										currentItem.lz = dlz;
+										currentItem.z1 = z;
 									}
-								} else {
-									currentItem.lz = dlz;
-									currentItem.z1 = z;
 								}
+							} else {
+								currentItem.lz = dlz;
+								currentItem.z1 = z;
 							}
 							break;
 						case 'topLeft':
 							dlx = currentItem.lx + (currentItem.x - x);
 							dlz = currentItem.lz + (currentItem.z - z);
 							if (dlx > minSize.lx && dlz > minSize.lz) {
-								if (currentItem.type != 'door') {
-									currentItem.lx = dlx;
-									currentItem.lz = dlz;
-									currentItem.x = x;
-									currentItem.z = z;
-								}
+								if (currentItem.type == 'door') return;
+								
+								currentItem.lx = dlx;
+								currentItem.lz = dlz;
+								currentItem.x = x;
+								currentItem.z = z;
 							}
 							break;
 						case 'bottomLeft':
 							dlx = currentItem.lx + (currentItem.x - x);
 							dlz = currentItem.lz + (z - currentItem.z1);
 							if (dlx > minSize.lx && dlz > minSize.lz) {
-								if (currentItem.type != 'door') {
-									currentItem.lx = dlx;
-									currentItem.lz = dlz;
-									currentItem.x = x;
-									currentItem.z1 = z;
-								}
+								if (currentItem.type == 'door') return;
+								
+								currentItem.lx = dlx;
+								currentItem.lz = dlz;
+								currentItem.x = x;
+								currentItem.z1 = z;
 							}
 							break;
 						case 'topRight':
 							dlx = currentItem.lx + (x - currentItem.x1);
 							dlz = currentItem.lz + (currentItem.z - z);
 							if (dlx > minSize.lx && dlz > minSize.lz) {
-								if (currentItem.type != 'door') {
-									currentItem.lx = dlx;
-									currentItem.lz = dlz;
-									currentItem.x1 = x;
-									currentItem.z = z;
-								}
+								if (currentItem.type == 'door') return;
+								
+								currentItem.lx = dlx;
+								currentItem.lz = dlz;
+								currentItem.x1 = x;
+								currentItem.z = z;
 							}
 							break;
 						case 'bottomRight':
 							dlx = currentItem.lx + (x - currentItem.x1);
 							dlz = currentItem.lz + (z - currentItem.z1);
 							if (dlx > minSize.lx && dlz > minSize.lz) {
-								if (currentItem.type != 'door') {
-									currentItem.lx = dlx;
-									currentItem.lz = dlz;
-									currentItem.x1 = x;
-									currentItem.z1 = z;
-								}
+								if (currentItem.type == 'door') return;
+								
+								currentItem.lx = dlx;
+								currentItem.lz = dlz;
+								currentItem.x1 = x;
+								currentItem.z1 = z;
 							}
 							break;
 						default:
