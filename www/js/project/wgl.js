@@ -154,8 +154,8 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 	// gl.uniform4fv(shaderProgramGrid.uColor, [1.0, 1.0, 1.0, 1.0]);
 	// gl.drawArrays(gl.LINES, 0, gridVertexPositionBuffer.numItems);
 	
-	for (var i in build.getItem()){
-		var item = build.getItem(i);
+	for (var i in _global_.Building.getItem()){
+		var item = _global_.Building.getItem(i);
 		if (item === undefined) continue;
 		var	dx = item.x + item.lx * 0.5,
 			dz = item.z + item.lz * 0.5,
@@ -228,7 +228,9 @@ function initScene(elem) {
 		top: 1.0
 	});
 	
-	build = new Building();
+	_global_.Building = new Building();
+	
+	_global_.Building = new Building();
 	
 	var key = new Keyboard();
 	
@@ -327,11 +329,11 @@ function initScene(elem) {
 							y: 0.1,
 							z: z - sizeNewItem.lz / 2.0
 						};
-						build.addRoom(positionNewItem.x, positionNewItem.y, positionNewItem.z,
+						_global_.Building.addRoom(positionNewItem.x, positionNewItem.y, positionNewItem.z,
 							sizeNewItem.lx, sizeNewItem.ly, sizeNewItem.lz);
 					}
 					
-					currentItem = findItem(x, z, build.getItem());
+					currentItem = findItem(x, z, _global_.Building.getItem());
 					
 					if (currentItem !== undefined) {
 						isMoveItem();
@@ -339,7 +341,7 @@ function initScene(elem) {
 						previousSettingsItem.setOldItem(currentItem);
 						
 						boxItems = {};
-						definingNeighbors(build.getItem(), graph, currentItem, boxItems);
+						definingNeighbors(_global_.Building.getItem(), graph, currentItem, boxItems);
 						console.warn(boxItems);
 						
 						var arrayItems = highlightedItems.valueOf();
@@ -349,8 +351,8 @@ function initScene(elem) {
 							moveItem = false;
 							resizeItem = false;
 							
-							var previousItem = build.getItem(arrayItems[0]);
-							var allItems = build.getItem();
+							var previousItem = _global_.Building.getItem(arrayItems[0]);
+							var allItems = _global_.Building.getItem();
 							var spaceBetweenRooms = new Section().get(previousItem, currentItem, allItems);
 							
 							if (spaceBetweenRooms !== undefined) {
@@ -372,7 +374,7 @@ function initScene(elem) {
 									}
 								}
 								if (responseMessage === 'success') {
-									var door = build.addDoor(previousItem, currentItem);
+									var door = _global_.Building.addDoor(previousItem, currentItem);
 									highlightedItems.add(door.id);
 									graph.add(door.id, previousItem.id, currentItem.id);
 								} else {
@@ -406,7 +408,7 @@ function initScene(elem) {
 					}
 					
 					function isResizeItem () {
-						var side = findBorder(x, z, build.getItem(currentItem.id), cameraControl.getZoom());
+						var side = findBorder(x, z, _global_.Building.getItem(currentItem.id), cameraControl.getZoom());
 						if (side != undefined) {
 							moveItem = false;
 							resizeItem = true;
@@ -460,7 +462,7 @@ function initScene(elem) {
 				} else if (moveItem) {
 					currentItem.x = x - prevXm,
 					currentItem.z = z - prevZm;
-					var ERROR = build.updateItem(currentItem);
+					var ERROR = _global_.Building.updateItem(currentItem);
 					if (ERROR) {
 						highlightColor.set(color.RED);
 					} else {
@@ -478,24 +480,40 @@ function initScene(elem) {
 							dlx = currentItem.lx + (currentItem.x - x);
 							if (!(dlx > minSize.lx)) break;
 							
-							if (IsSimpleItem(currentItem, graph)) {
-								changeCurrentItem(currentItem, {x: x, lx: dlx});
-							} else {
-								if (currentItem.type == 'room') {
-									if (boxItems.LEFT !== undefined) {
-										changeCurrentItem(currentItem, {x: x, lx: dlx});
-										
-										for (var i = boxItems.LEFT.length; --i >= 0;) {
-											var m_door = build.getItem(boxItems.LEFT[i]);
-											m_door.x1 = x;
-											m_door.lx = m_door.x1 - m_door.x;
-											build.updateItem(m_door);
-										}
-									} else {
-										changeCurrentItem(currentItem, {x: x, lx: dlx});
-									}
-								} else if (currentItem.type == 'door') {
-									// делать что-то, если выбрана дверь
+							if (currentItem.type == 'door') {
+								var door = currentItem;
+								var nodes = graph.getNode(door.id);
+								
+								var firstNode = _global_.Building.getItem(nodes[0]);
+								var secondNode = _global_.Building.getItem(nodes[1]);
+								
+								var dx = firstNode.center.x - secondNode.center.x;
+								if (dx > (firstNode.lx/2 + secondNode.lx/2)) break;
+								
+								// код ниже не работает
+								// --- start ---
+								var marginalPosition = Math.max(firstNode.x, secondNode.x);
+								console.log(currentItem.x, marginalPosition);
+								if (currentItem.x < marginalPosition) {
+									break;
+								}
+								// --- end ---
+							}
+							
+							changeCurrentItem(currentItem, {x: x, lx: dlx});
+							
+							if (!IsSimpleItem(currentItem, graph)) {
+								if (boxItems.LEFT === undefined) break;
+								
+								var local = {};
+								for (var i = boxItems.LEFT.length; --i >= 0;) {
+									local.door = _global_.Building.getItem(boxItems.LEFT[i]);
+									local.door.x1 = x;
+									local.door.lx = local.door.x1 - local.door.x;
+									_global_.Building.updateItem(local.door);
+									
+									// если вместо return стоит break, то условие не работает
+									if (!(local.door.lx > minSize.lx)) return;
 								}
 							}
 							break;
@@ -511,12 +529,14 @@ function initScene(elem) {
 										changeCurrentItem(currentItem, {x1: x, lx: dlx});
 										
 										for (var i = boxItems.RIGHT.length; --i >= 0;) {
-											var m_door = build.getItem(boxItems.RIGHT[i]);
+											var m_door = _global_.Building.getItem(boxItems.RIGHT[i]);
 											// если поменять строчки 1 и 2 местами
 											// не будет работать изменение размера зависимого объекта
 											m_door.lx = m_door.lx + (m_door.x - x);	// 1
 											m_door.x = x;							// 2
-											build.updateItem(m_door);
+											_global_.Building.updateItem(m_door);
+											
+											if (!(m_door.lx > minSize.lx)) return;
 										}
 									} else {
 										changeCurrentItem(currentItem, {x1: x, lx: dlx});
@@ -525,13 +545,14 @@ function initScene(elem) {
 									// делать что-то, если выбрана дверь
 								}
 							}
+
 							break;
 						case 'top': // изменяем размер вверх
 							dlz = currentItem.lz + (currentItem.z - z);
 							if (!(dlz > minSize.lz)) break;
 
 							if (currentItem.type == 'door') {
-								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, _global_.Building);
 								if (borderDoor.distance.z == 0) {
 									if (z > borderDoor.z) {
 										currentItem.lz = dlz;
@@ -548,7 +569,7 @@ function initScene(elem) {
 							if (!(dlz > minSize.lz)) break;
 
 							if (currentItem.type == 'door') {
-								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, build);
+								var borderDoor = getSpaceBetweenRooms(currentItem.id, graph, _global_.Building);
 								if (borderDoor.distance.z == 0) {
 									if (z < borderDoor.z + borderDoor.lz) {
 										currentItem.lz = dlz;
@@ -612,7 +633,7 @@ function initScene(elem) {
 							console.log('Непонятки');
 							break;
 					}
-					var ERROR = build.updateItem(currentItem);
+					var ERROR = _global_.Building.updateItem(currentItem);
 					if (ERROR) {
 						highlightColor.set(color.RED);
 					} else {
@@ -621,13 +642,13 @@ function initScene(elem) {
 					drawScene(cameraControl, highlightedItems, highlightColor);
 				} else {
 					if (highlightedItems.valueOf().length > 0 && key.getKeyCode() === undefined) {
-						currentItem = findItem(x, z, build.getItem());
+						currentItem = findItem(x, z, _global_.Building.getItem());
 						if (currentItem !== undefined) {
 							if (highlightedItems.has(currentItem.id)) {
 								findBorder(x, z, currentItem, cameraControl.getZoom());
 							}
 						} else {
-							findBorder(x, z, build.getItem(highlightedItems.valueOf()[0]), cameraControl.getZoom());
+							findBorder(x, z, _global_.Building.getItem(highlightedItems.valueOf()[0]), cameraControl.getZoom());
 						}
 					}
 				}
@@ -656,7 +677,7 @@ function initScene(elem) {
 				
 				if (key.getKeyCode() == keyCode.DELETE) {
 					if (currentItem !== undefined) {
-						var deletedItem = build.removeItem(currentItem.id);
+						var deletedItem = _global_.Building.removeItem(currentItem.id);
 						if (graph.remove(currentItem.id)) {
 							console.info('Удален элеменет "' + deletedItem.type + '"', deletedItem);
 						}
@@ -665,13 +686,13 @@ function initScene(elem) {
 				
 				drawScene(cameraControl, highlightedItems, highlightColor);
 				
-				//var str = JSON.stringify(build.getItem(), "", 4);
+				//var str = JSON.stringify(_global_.Building.getItem(), "", 4);
 				//console.log(str);
 				
 				function returnPreviousValue () {
-					var ERROR = build.updateItem(currentItem);
+					var ERROR = _global_.Building.updateItem(currentItem);
 					if (ERROR) {
-						build.updateItem(previousSettingsItem.getOldItem());
+						_global_.Building.updateItem(previousSettingsItem.getOldItem());
 						highlightColor.set(color.TURQUOISE);
 					}
 				}
@@ -758,11 +779,11 @@ function initScene(elem) {
 			}
 		}
 		
-		function getSpaceBetweenRooms(itemId, graph, build) {
+		function getSpaceBetweenRooms(itemId, graph, building) {
 			var e = graph.getNode(itemId);
-			var item0 = build.getItem(e[0]);
-			var item1 = build.getItem(e[1]);
-			var borderDoor = new Section().get(item0, item1, build.getItem());
+			var item0 = building.getItem(e[0]);
+			var item1 = building.getItem(e[1]);
+			var borderDoor = new Section().get(item0, item1, building.getItem());
 			return borderDoor;
 		}
 		
@@ -779,7 +800,7 @@ function initScene(elem) {
 				var boxButtomItems = new Set();
 
 				for (var i = doorsOfRoomTotal; --i >= 0;) {
-					var door = build.getItem(arrDoorsId[i]);
+					var door = _global_.Building.getItem(arrDoorsId[i]);
 					currentItem.center = {
 						x: currentItem.x + currentItem.lx/2.0,
 						y: currentItem.y + currentItem.ly/2.0,
@@ -829,7 +850,7 @@ function initScene(elem) {
 function initNavigation() {
 	$('#saveProject').click(function () {
 		var objForSave = {};
-		for (var item in build.getItem()) {
+		for (var item in _global_.Building.getItem()) {
 			var graphForSave = graph.getGraph(item);
 			if (graphForSave.length < 2) continue;
 			
@@ -846,7 +867,7 @@ function initNavigation() {
 			url: 'cgi-php/saveProject.php',
 			type: 'post',
 			data: {
-				build: build.getItem(),
+				build: _global_.Building.getItem(),
 				graph: objForSave,
 			},
 			success: function (data, code) {
@@ -865,7 +886,7 @@ function initNavigation() {
 			type: 'post',
 			dataType: 'json',
 			success: function (response, code) {
-				build.readBuildingFromFile(response);
+				_global_.Building.readBuildingFromFile(response);
 				drawScene(cameraControl, highlightedItems, highlightColor);
 			},
 			error: function(xhr, str) {
