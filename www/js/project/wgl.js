@@ -1,4 +1,4 @@
-var gl;
+﻿var gl;
 	
 function initGL(canvas) {
 	var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
@@ -205,19 +205,29 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 устанавливаются начальные параметры смещения и приближения сцены.
 	Функция drawScene(cameraControl) отрисовывает сцену. Входной параметр - объект класса Camera.
 */
+
+// Глобальные переменные.
+// Их необходимо спрятать в модуль.
+// Так будет и удобнее, и безопаснее
 var cameraControl;
 var highlightedItems;
 var highlightColor;
-var build;
 var graph;
 function initScene(elem) {
-	console.time('Загрузка initScene()');
+	console.time('Время загрузки initScene()');
 	
+	// Установки холста по умолчанию
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 	
+	// Инициализация глобальных переменных
+	// _global_ - префикс глобальных переменных
+	// highlightedItems - выделенные элементы
 	highlightedItems = new Set();
+	// highlightColor - цвет выделения
 	highlightColor = new Color();
+	// cameraControl - управление камерой
+	// Параметры по умолчанию
 	cameraControl = new Camera({
 		zoom: 10.0,
 		dx: 0.0,
@@ -227,19 +237,29 @@ function initScene(elem) {
 		bottom: -1.0,
 		top: 1.0
 	});
-	
+	// Building - объект класса Building / Здание
+	// Хранит все объекты, отображаемые на холсте
 	_global_.Building = new Building();
 	
-	_global_.Building = new Building();
-	
+	// Переменная метода
+	// Слушает нажатия клавиш, возвращает код клавиши
 	var key = new Keyboard();
 	
-	wheelListener(elem);
-	mouseListener(elem);
+	// Запуск функций, которые выполняют работу с холстом
+	// и объектами на нем
+	WheelListener(elem);
+	MouseListener(elem);
 	
+	// Первая отрисовка холста
 	drawScene(cameraControl, highlightedItems, highlightColor);
 
-	function wheelListener (elem){
+	// Возможно, стоит вынести эту функцию в отдельный файл
+	// Функция обрабатывает движение колёсика, из-за чего меняется масштаб
+	// *Взята из интернета*
+	// Имеет один входной параметр - DOM объект, канвас,
+	// но, думаю, следует убрать использование глобальных объектов
+	// и вынести их во входные параметры
+	function WheelListener (elem) {
 		if (elem.addEventListener) {
 			if ('onwheel' in document) {
 				elem.addEventListener("wheel", onWheel, false);
@@ -261,8 +281,16 @@ function initScene(elem) {
 		}
 	}
 	
-	function mouseListener(elem) {
+	// Возможно, и эту функцию стоит вынести в отдельный файл
+	// Обрабатывает все возможные движения мыши на холсте
+	// Из-за большого количества внутренних функций, 
+	// имеет смысл вынести их за её пределы
+	// Имеет один входной параметр - DOM объект, канвас,
+	// но, думаю, следует убрать использование глобальных объектов
+	// и вынести их во входные параметры
+	function MouseListener(elem) {
 		var selector = '#canvas';
+		// jQuery-обработка событий
 		$(selector).on("mousedown", s);
 		$(selector).on("mousemove", s);
 		$(selector).on("mouseup", s);
@@ -277,47 +305,83 @@ function initScene(elem) {
 			}
 		}
 		
+		// previousSettingsItem - хранит в себе параметры элемента до изменения.
+		// В этом классе нужно применить геттеры и сеттеры
 		var previousSettingsItem = new OldItem();
+		// Переменная глобальной области видимости
+		// Следует перенести ее объявление в начало
 		graph = new Graph();
-
+		
+		// Метод, который занимается обработкой движений в области холста
 		function Draggable() {
+			// Локальные переменные метода
+			// Выбранный элемент
+			// Используется во многих функциях метода,
+			// возможно, есть смысл сделать его глобальным
 			var	currentItem = undefined,
+			// изменяемая сторона элемента
 				sideChanges = undefined;
 			
+			// Логические операторы действий
+			// Оператор разрешения перемещения камеры
 			var moveCamera = false,
+			// Оператор разрешения перемещения элемента
 				moveItem = false,
+			// Оператор разрешения изменения размеров элемента
 				resizeItem = false;
 			
+			// Предыдущие координаты
+			// камеры,
 			var prevXd,
 				prevZd,
+			// элемента
 				prevXm,
 				prevZm; 
 			
-			var boxItems;
+			// Коробка для хранения объектов, которые соединены с выбранным
+			var boxItems = {};
 			
+			// Коды клавиш
+			// Возможно, нужно вынести этот объект за пределы метода в модуль
 			var keyCode = {
 				SHIFT: 16,
 				CTRL: 17,
 				ALT: 18,
 				DELETE: 46
 			};
-				
+			
+			// Кодировки цветов для выделения (RGBA)
+			// Возможно, нужно вынести этот объект за пределы метода в модуль
 			var color = {
 				RED: [1.0, 0.0, 0.0, 1.0],
 				TURQUOISE: [0.0, 1.0, 1.0, 1.0]
 			};
+			// Установка цвета выделения по умолчанию
+			// В этом классе нужно применить геттеры и сеттеры
 			highlightColor.set(color.TURQUOISE);
 			
+			// Функция обработки нажатия кнопки мыши
+			// ev - событие
 			this.mousedown = function (ev) {
+				// В первую очередь обрабатывается нажатие правой кнопки мыши
+				// для изменения положения камеры
 				var isRightButton = defineRightButton(ev);
+				// Если нажата правая кнопка мыши
+				// сохраняются координаты в момент нажатия
+				// разрешается возможность изменения положения камеры
+				// Если же нажата левая кнопка, то управление переходит дальше
 				if (isRightButton) {
 					prevXd = fs(ev, 'x');
 					prevZd = gl.viewportHeight - fs(ev, 'z');
 					moveCamera = true;
 				} else {
+					// Запоминается положение мыши в абсолютных координатах
+					// *Используются только в этой функции
 					var x = fs(ev, 'x')*(cameraControl.get().r-cameraControl.get().l)/gl.viewportWidth + cameraControl.get().l;
 					var	z = (gl.viewportWidth-fs(ev, 'z'))*(cameraControl.get().b-cameraControl.get().t)/gl.viewportHeight - cameraControl.get().b;
 					
+					// Условие добавления новой комнаты
+					// Есть смысл упаковать это в функцию
 					if (key.getKeyCode() == keyCode.CTRL) {
 						var sizeNewItem = {
 							lx: 2.0,
@@ -333,14 +397,17 @@ function initScene(elem) {
 							sizeNewItem.lx, sizeNewItem.ly, sizeNewItem.lz);
 					}
 					
+					// Получение объекта
 					currentItem = findItem(x, z, _global_.Building.getItem());
-					
+					// Условия работы с объектом
 					if (currentItem !== undefined) {
+						// 
 						isMoveItem();
 						isResizeItem();
+						// Запись исходного состояния объекта
 						previousSettingsItem.setOldItem(currentItem);
 						
-						boxItems = {};
+						// !По какой-то причине с первого клика соседние элементы не определяются
 						definingNeighbors(_global_.Building.getItem(), graph, currentItem, boxItems);
 						console.warn(boxItems);
 						
@@ -844,7 +911,7 @@ function initScene(elem) {
 			}
 		}
 	}
-	console.timeEnd('Загрузка initScene()');
+	console.timeEnd('Время загрузки initScene()');
 }
 
 function initNavigation() {
