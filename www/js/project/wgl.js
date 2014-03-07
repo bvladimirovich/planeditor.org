@@ -253,7 +253,7 @@ function initScene(elem) {
 	// Первая отрисовка холста
 	drawScene(cameraControl, highlightedItems, highlightColor);
 
-	// Возможно, стоит вынести эту функцию в отдельный файл
+	// *Возможно, стоит вынести эту функцию в отдельный файл
 	// Функция обрабатывает движение колёсика, из-за чего меняется масштаб
 	// *Взята из интернета*
 	// Имеет один входной параметр - DOM объект, канвас,
@@ -281,7 +281,7 @@ function initScene(elem) {
 		}
 	}
 	
-	// Возможно, и эту функцию стоит вынести в отдельный файл
+	// *Возможно, и эту функцию стоит вынести в отдельный файл
 	// Обрабатывает все возможные движения мыши на холсте
 	// Из-за большого количества внутренних функций, 
 	// имеет смысл вынести их за её пределы
@@ -306,17 +306,17 @@ function initScene(elem) {
 		}
 		
 		// previousSettingsItem - хранит в себе параметры элемента до изменения.
-		// В этом классе нужно применить геттеры и сеттеры
+		// *В этом классе нужно применить геттеры и сеттеры
 		var previousSettingsItem = new OldItem();
 		// Переменная глобальной области видимости
-		// Следует перенести ее объявление в начало
+		// *Следует перенести ее объявление в начало
 		graph = new Graph();
 		
 		// Метод, который занимается обработкой движений в области холста
 		function Draggable() {
 			// Локальные переменные метода
 			// Выбранный элемент
-			// Используется во многих функциях метода,
+			// *Используется во многих функциях метода,
 			// возможно, есть смысл сделать его глобальным
 			var	currentItem = undefined,
 			// изменяемая сторона элемента
@@ -342,7 +342,7 @@ function initScene(elem) {
 			var boxItems = {};
 			
 			// Коды клавиш
-			// Возможно, нужно вынести этот объект за пределы метода в модуль
+			// *Возможно, нужно вынести этот объект за пределы метода в модуль
 			var keyCode = {
 				SHIFT: 16,
 				CTRL: 17,
@@ -351,13 +351,13 @@ function initScene(elem) {
 			};
 			
 			// Кодировки цветов для выделения (RGBA)
-			// Возможно, нужно вынести этот объект за пределы метода в модуль
+			// *Возможно, нужно вынести этот объект за пределы метода в модуль
 			var color = {
 				RED: [1.0, 0.0, 0.0, 1.0],
 				TURQUOISE: [0.0, 1.0, 1.0, 1.0]
 			};
 			// Установка цвета выделения по умолчанию
-			// В этом классе нужно применить геттеры и сеттеры
+			// *В этом классе нужно применить геттеры и сеттеры
 			highlightColor.set(color.TURQUOISE);
 			
 			// Функция обработки нажатия кнопки мыши
@@ -381,7 +381,7 @@ function initScene(elem) {
 					var	z = (gl.viewportWidth-fs(ev, 'z'))*(cameraControl.get().b-cameraControl.get().t)/gl.viewportHeight - cameraControl.get().b;
 					
 					// Условие добавления новой комнаты
-					// Есть смысл упаковать это в функцию
+					// *Есть смысл упаковать это в функцию
 					if (key.getKeyCode() == keyCode.CTRL) {
 						var sizeNewItem = {
 							lx: 2.0,
@@ -408,29 +408,41 @@ function initScene(elem) {
 						previousSettingsItem.setOldItem(currentItem);
 						
 						// !По какой-то причине с первого клика соседние элементы не определяются
+						// Одна из возможных причин: переменная graph еще не заполнена, необходимо проверить.
 						definingNeighbors(_global_.Building.getItem(), graph, currentItem, boxItems);
 						console.warn(boxItems);
-						
+						// Массив выделенных элементов
+						// Применяется для создания дверей между комнатами и выделения цветом
 						var arrayItems = highlightedItems.valueOf();
+						// Обработка клавиши SHIFT
 						if (key.getKeyCode() == keyCode.SHIFT) {
+							// При этом, если ещё нет выделенных элементов, то ни чего не произойдёт
 							if (arrayItems.length == 0) return;
-							
+							// Перемещение элемента и изменение размеров блокируется
 							moveItem = false;
 							resizeItem = false;
-							
+							// Получение из выделенных первого
 							var previousItem = _global_.Building.getItem(arrayItems[0]);
+							// Все элементы на холсте
 							var allItems = _global_.Building.getItem();
+							// Получение пространства между комнатами
+							// *Возможно, применение геттеров и сеттеров упростит запись и сделает ее красивее
 							var spaceBetweenRooms = new Section().get(previousItem, currentItem, allItems);
 							
+							// *Это условие нужно исправить - избавиться от вложенности
 							if (spaceBetweenRooms !== undefined) {
 								var MIN_SIZE_SPACE = {
 									x: 0.5, y: 0.5, z: 0.5
 								};
 								var MAX_SIZE_SPACE = {
 									x: 3.0, y: 3.0, z: 3.0
-								};								
+								};
+								// Сообщение о выполнении условий
+								// *Все подобные сообщения стоит упорядочить,
+								// возможно в таблицу
 								var responseMessage = 'success';
-								
+								// Ограничение размеров двери при создании
+								// *Пересмотреть с целью переработки цикла
 								for (var i in spaceBetweenRooms.distance) {
 									if (spaceBetweenRooms['l'+i] < MIN_SIZE_SPACE[i]) {
 										responseMessage = 'Fail. Размер двери не соответствует требованиям. l' + i + ' меньше '+ MIN_SIZE_SPACE[i];
@@ -440,34 +452,50 @@ function initScene(elem) {
 										break;
 									}
 								}
+								// Обработка удовлетворения условиям
 								if (responseMessage === 'success') {
+									// И создание двери между выбранными комнатами
 									var door = _global_.Building.addDoor(previousItem, currentItem);
+									// Выделение цветом новой двери в связке с комнатами
 									highlightedItems.add(door.id);
+									// Добавление ребра (двери) между узлами (комнатами) в граф
 									graph.add(door.id, previousItem.id, currentItem.id);
 								} else {
+									// Если не выполнены условия при создании двери,
+									// список выделенных элементов чистится,
+									// а в консоль выводятся сведения об ошибке
 									highlightedItems.clear();
 									console.error(responseMessage);
 								}
+								// Помимо всего выделяется последний выбранный элемент
 								highlightedItems.add(currentItem.id);
 							}
-						} else if (key.getKeyCode() == keyCode.ALT){	// прилипание комнат
-
+						// Обработка клавиши ALT для прилипания комнат
+						} else if (key.getKeyCode() == keyCode.ALT){
+							// Какой-то код
+						// Действия в случае отсутствия нажатых клавиш
 						} else {
+							// Чистка списка выделенных элементов
+							// при выборе нового
 							if (arrayItems.length > 0) {
 								highlightedItems.clear();
 							}
-
-							highlightedItems.add(currentItem.id);							
+							
+							highlightedItems.add(currentItem.id);
+							// Выделение графа
 							selectedGraph(currentItem, graph);
-
+							// Отображение параметров выбранного элемента в HTML форме
 							showParameters(currentItem);
 						}
 					} else {
+						// При нажатии на пустое место холста
+						// очистка списка выделенных элементов
 						highlightedItems.clear();
 					}
-					
+					// Обновление (перерисовка) холста в любом случае
 					drawScene(cameraControl, highlightedItems, highlightColor);
 					
+					// *Переименовать!
 					function isMoveItem () {
 						moveItem = true;
 						prevXm = x - currentItem.x; // координаты мышки на элементе
