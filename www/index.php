@@ -8,6 +8,7 @@
 <script src="js/project/struct.js"></script>
 <script src="js/project/wgl.js"></script>
 <script src="js/project/modules.js"></script>
+<script src="js/project/funcInitScene.js"></script>
 <script src="js/project/main.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
