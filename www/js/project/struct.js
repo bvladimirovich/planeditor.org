@@ -324,23 +324,12 @@ Camera.prototype.setDxDz = function (a, b) {	// установка смещен�
 	this.dz -= b;
 };
 Camera.prototype.get = function () {	// получение параметров камеры
-	return{
+	return {
 		l: this.l*this.zoom + this.dx,
 		r: this.r*this.zoom + this.dx,
 		b: this.b*this.zoom + this.dz,
 		t: this.t*this.zoom + this.dz
 	}
-};
-
-/** Управление цветом */
-var Color = function () {
-	this.color = undefined;
-};
-Color.prototype.set = function (color) {	// установка цвета выделения
-	this.color = color
-};
-Color.prototype.get = function () {	// получение цвета
-	return this.color;
 };
 
 /** Прослушивание нажатий клавиш */
@@ -357,17 +346,29 @@ Keyboard.prototype.getKeyCode = function () {	// получение кода к�
 };
 
 /**	Хранение/копирование элемента */
-var OldItem = function () {
-	this.oldItem = {};	// новый элемент
-};
-OldItem.prototype.setOldItem = function (item) {	// установка элемента
-	for (var i in item) {
-		this.oldItem[i] = item[i];	// перезапись всех свойств входящего элемента в новый.
+var OldItem = {};
+Object.defineProperty(OldItem, "val", {
+	get: function() {
+		return this.oldItem;
+	},
+	set: function(item) {
+		this.oldItem = {};
+		for (var i in item) {
+			this.oldItem[i] = item[i];	// перезапись всех свойств входящего элемента в новый.
+		}
 	}
-};
-OldItem.prototype.getOldItem =  function () {	// получение элемента
-	return this.oldItem;
-};
+});
+
+/** Управление цветом */
+var Color = {};
+Object.defineProperty(Color, "val", {
+	get: function() {
+		return this.color;
+	},
+	set: function(color) {
+		this.color = color
+	}
+});
 
 /** Граф */
 var Graph = function () {
@@ -503,44 +504,5 @@ Set.prototype.isEmpty = function () {
 		return true;
 	} else {
 		return false;
-	}
-};
-
-var Item = function () {
-	this.item = undefined;
-};
-Item.prototype.add = function (i) {
-	this.item = i;
-};
-Item.prototype.get = function () {
-	if (!this.is) {
-		console.error('Элемент еще не существует');
-	}
-	return this.item;
-};
-Item.prototype.remove = function () {
-	if (!this.is) {
-		console.error('Элемент еще не существует');
-	}
-	this.item = undefined;
-};
-Item.prototype.change = function () {
-	if (!this.is) {
-		console.error('Элемент еще не существует');
-	}
-	return {
-		x: function (x) {this.item.x = x},
-		y: function (y) {this.item.y = y},
-		z: function (z) {this.item.z = z},
-		lx: function (lx) {this.item.lx = lx},
-		ly: function (ly) {this.item.ly = ly},
-		lz: function (lz) {this.item.lz = lz},
-	};
-};
-Item.prototype.is = function () {
-	if (this.item === undefined) {
-		return false;
-	} else {
-		return true;
 	}
 };

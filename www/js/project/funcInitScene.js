@@ -26,7 +26,7 @@ function WheelListener (obj) {
 // Обрабатывает все возможные движения мыши на холсте
 // Из-за большого количества внутренних функций, 
 // имеет смысл вынести их за её пределы
-function MouseListener(obj) {
+function MouseListener(elem) {
 	var selector = '#canvas';
 	// jQuery-обработка событий
 	$(selector).on("mousedown", s);
@@ -45,7 +45,7 @@ function MouseListener(obj) {
 	
 	// previousSettingsItem - хранит в себе параметры элемента до изменения.
 	// *В этом классе нужно применить геттеры и сеттеры
-	var previousSettingsItem = new OldItem();
+	//var previousSettingsItem = new OldItem();
 	
 	// Метод, который занимается обработкой движений в области холста
 	function Draggable() {
@@ -93,8 +93,7 @@ function MouseListener(obj) {
 			TURQUOISE: [0.0, 1.0, 1.0, 1.0]
 		};
 		// Установка цвета выделения по умолчанию
-		// *В этом классе нужно применить геттеры и сеттеры
-		highlightColor.set(color.TURQUOISE);
+		Color.val = color.TURQUOISE;
 		
 		// Функция обработки нажатия кнопки мыши
 		// ev - событие
@@ -141,7 +140,7 @@ function MouseListener(obj) {
 					isMoveItem();
 					isResizeItem();
 					// Запись исходного состояния объекта
-					previousSettingsItem.setOldItem(currentItem);
+					OldItem.val = currentItem;
 					
 					// !По какой-то причине с первого клика соседние элементы не определяются
 					// Одна из возможных причин: переменная graph еще не заполнена, необходимо проверить.
@@ -230,7 +229,7 @@ function MouseListener(obj) {
 					highlightedItems.clear();
 				}
 				// Обновление (перерисовка) холста в любом случае
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 				
 				// *Переименовать!
 				function isMoveItem () {
@@ -303,17 +302,17 @@ function MouseListener(obj) {
 				cameraControl.setDxDz((nX-prevXd)/k, (nZ-prevZd)/k);
 				prevXd = nX;
 				prevZd = nZ;
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			} else if (moveItem) {
 				currentItem.x = x - prevXm,
 				currentItem.z = z - prevZm;
 				var ERROR = _global_.Building.updateItem(currentItem);
 				if (ERROR) {
-					highlightColor.set(color.RED);
+					Color.val = color.RED;
 				} else {
-					highlightColor.set(color.TURQUOISE);
+					Color.val = color.TURQUOISE;
 				}
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			} else if (sideChanges) {
 				var minSize = {
 					lx: 0.6,
@@ -490,11 +489,11 @@ function MouseListener(obj) {
 				}
 				var ERROR = _global_.Building.updateItem(currentItem);
 				if (ERROR) {
-					highlightColor.set(color.RED);
+					Color.val = color.RED;
 				} else {
-					highlightColor.set(color.TURQUOISE);
+					Color.val = color.TURQUOISE;
 				}
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			} else {
 				
 				if (highlightedItems.valueOf().length > 0 && key.getKeyCode() === undefined) {
@@ -540,7 +539,7 @@ function MouseListener(obj) {
 				}
 			}
 			
-			drawScene(cameraControl, highlightedItems, highlightColor);
+			drawScene(cameraControl, highlightedItems, Color.val);
 			
 			//var str = JSON.stringify(_global_.Building.getItem(), "", 4);
 			//console.log(str);
@@ -548,8 +547,8 @@ function MouseListener(obj) {
 			function returnPreviousValue () {
 				var ERROR = _global_.Building.updateItem(currentItem);
 				if (ERROR) {
-					_global_.Building.updateItem(previousSettingsItem.getOldItem());
-					highlightColor.set(color.TURQUOISE);
+					_global_.Building.updateItem(OldItem.val);
+					Color.val = color.TURQUOISE;
 				}
 			}
 		}
@@ -565,8 +564,7 @@ function MouseListener(obj) {
 		$('#y').val(currentItem.y.toFixed(2));
 		$('#z').val(currentItem.z.toFixed(2));
 	}
-	
-	var elem = obj.selector;
+
 	/* Функция определения координат мыши на холсте */
 	// defineMousePosition
 	function fs(ev, p) {

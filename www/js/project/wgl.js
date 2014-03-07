@@ -190,7 +190,7 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, borderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 			gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
 			gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-			gl.uniform4fv(shaderProgram.uColor, highlightColor.get());
+			gl.uniform4fv(shaderProgram.uColor, Color.val);
 			gl.drawArrays(gl.LINE_STRIP, 0, borderVertexPositionBuffer.numItems);
 		}
 	}
@@ -227,9 +227,6 @@ function initScene(elem) {
 	// highlightedItems - выделенные элементы
 	highlightedItems = new Set();
 	
-	// highlightColor - цвет выделения
-	highlightColor = new Color();
-	
 	// cameraControl - управление камерой
 	// Параметры по умолчанию
 	cameraControl = new Camera({
@@ -257,7 +254,7 @@ function initScene(elem) {
 		selector: elem,
 		camera: cameraControl,
 		highlightedItems: highlightedItems,
-		highlightColor: highlightColor,
+		highlightColor: Color.val,
 		building: Building,
 		key: key,
 		graph: graph,
@@ -269,7 +266,7 @@ function initScene(elem) {
 	// Запуск функций, которые выполняют работу с холстом
 	// и объектами на нем
 	WheelListener(obj);
-	MouseListener(obj);
+	MouseListener(elem);
 	
 	// Первая отрисовка холста
 	obj.updateScene();
@@ -302,7 +299,7 @@ function initNavigation() {
 			},
 			success: function (data, code) {
 				console.info(code); // запрос успешно прошёл
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			},
 			error: function(xhr, str) {
 				console.error('Критическая ошибка', str);
@@ -317,7 +314,7 @@ function initNavigation() {
 			dataType: 'json',
 			success: function (response, code) {
 				_global_.Building.readBuildingFromFile(response);
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			},
 			error: function(xhr, str) {
 				 console.error('Критическая ошибка', str); 
@@ -330,7 +327,7 @@ function initNavigation() {
 			dataType: 'json',
 			success: function (response, code) {
 				graph.readGraphsFromFile(response);
-				drawScene(cameraControl, highlightedItems, highlightColor);
+				drawScene(cameraControl, highlightedItems, Color.val);
 			},
 			error: function(xhr, str) {
 				 console.error('Критическая ошибка', str); 
