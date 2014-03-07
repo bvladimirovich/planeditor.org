@@ -324,6 +324,7 @@ function initScene(elem) {
 			
 			// Логические операторы действий
 			// Оператор разрешения перемещения камеры
+			// Переименовать в moveCameraStatus
 			var moveCamera = false,
 			// Оператор разрешения перемещения элемента
 				moveItem = false,
@@ -483,7 +484,7 @@ function initScene(elem) {
 							
 							highlightedItems.add(currentItem.id);
 							// Выделение графа
-							selectedGraph(currentItem, graph);
+							SelectedGraph(currentItem, graph);
 							// Отображение параметров выбранного элемента в HTML форме
 							showParameters(currentItem);
 						}
@@ -501,32 +502,42 @@ function initScene(elem) {
 						prevXm = x - currentItem.x; // координаты мышки на элементе
 						prevZm = z - currentItem.z;
 					}
-					
+					// *Переименовать!
 					function isResizeItem () {
+						// Определение выбранной грани
+						// Зона для появления значка изменения размера зависит от масштаба
+						// Чем крупнее, тем зона меньше
 						var side = findBorder(x, z, _global_.Building.getItem(currentItem.id), cameraControl.getZoom());
 						if (side != undefined) {
+							// В момент изменения размеров запрещается перемещение объекта
 							moveItem = false;
 							resizeItem = true;
 							sideChanges = side;
 						}
 					}
-				
-					function selectedGraph (currentItem, graph) {
-						console.time('TimeWorkGraph');
+					// Функция выделения связанных объектов
+					function SelectedGraph (currentItem, graph) {
+						console.time('Время выделения графа');
 						var currentItemID = currentItem.id;
-						
+						// Если выбрано ребро графа (дверь), то берётся первый узел этой двери
 						if (graph.isEdge(currentItemID)) {
 							currentItemID = graph.getNode(currentItemID)[0];
 						}
+						// Инициализация графа перед использованием,
+						// чтоб не определять его каждый раз
 						var g = graph.getGraph(currentItemID);
+						// *Возможно, стоит убрать вложенность этого условия
 						if (g.length > 1) {
+							// Обход по графу и выделение всех вершин
 							for (var i = g.length; --i >= 0;) {
 								if (!highlightedItems.has(g[i])) {
 									highlightedItems.add(g[i]);
-									
 								}
 							}
+							// Обход по графу и выделение всех рёбер
 							for (var i = g.length; --i >= 0;) {
+								// Для каждой вершины определяются все ребра
+								// и по ним делается обход
 								var e = graph.getEdge(g[i]);
 								for (var j in e) {
 									if (!highlightedItems.has(e[j])) {
@@ -534,13 +545,16 @@ function initScene(elem) {
 									}
 								}
 							}
+							// Элементы графа запрещено перемещать
 							moveItem = false;
 						}
-						console.timeEnd('TimeWorkGraph');
+						console.timeEnd('Время выделения графа');
 					}
 				}
 			}
 			
+			// Функция обработки перемещения мыши в области холста
+			// ev - событие
 			this.mousemove = function (ev) {
 				var x = fs(ev, 'x')*(cameraControl.get().r-cameraControl.get().l)/gl.viewportWidth + cameraControl.get().l,
 					z = (gl.viewportWidth-fs(ev, 'z'))*(cameraControl.get().b-cameraControl.get().t)/gl.viewportHeight - cameraControl.get().b;
