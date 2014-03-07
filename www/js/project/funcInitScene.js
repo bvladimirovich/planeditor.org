@@ -429,6 +429,8 @@ function MouseListener(obj) {
 						}
 						break;
 					case 'topLeft':
+						if (!IsSimpleItem(currentItem, graph)) return;
+						
 						dlx = currentItem.lx + (currentItem.x - x);
 						dlz = currentItem.lz + (currentItem.z - z);
 						if (dlx > minSize.lx && dlz > minSize.lz) {
@@ -441,6 +443,8 @@ function MouseListener(obj) {
 						}
 						break;
 					case 'bottomLeft':
+						if (!IsSimpleItem(currentItem, graph)) return;
+						
 						dlx = currentItem.lx + (currentItem.x - x);
 						dlz = currentItem.lz + (z - currentItem.z1);
 						if (dlx > minSize.lx && dlz > minSize.lz) {
@@ -453,6 +457,8 @@ function MouseListener(obj) {
 						}
 						break;
 					case 'topRight':
+						if (!IsSimpleItem(currentItem, graph)) return;
+						
 						dlx = currentItem.lx + (x - currentItem.x1);
 						dlz = currentItem.lz + (currentItem.z - z);
 						if (dlx > minSize.lx && dlz > minSize.lz) {
@@ -465,6 +471,8 @@ function MouseListener(obj) {
 						}
 						break;
 					case 'bottomRight':
+						if (!IsSimpleItem(currentItem, graph)) return;
+						
 						dlx = currentItem.lx + (x - currentItem.x1);
 						dlz = currentItem.lz + (z - currentItem.z1);
 						if (dlx > minSize.lx && dlz > minSize.lz) {
@@ -488,9 +496,10 @@ function MouseListener(obj) {
 				}
 				drawScene(cameraControl, highlightedItems, highlightColor);
 			} else {
+				
 				if (highlightedItems.valueOf().length > 0 && key.getKeyCode() === undefined) {
 					currentItem = findItem(x, z, _global_.Building.getItem());
-					if (currentItem !== undefined) {
+					if (currentItem !== undefined) {						
 						if (highlightedItems.has(currentItem.id)) {
 							findBorder(x, z, currentItem, cameraControl.getZoom());
 						}
