@@ -27,6 +27,20 @@ Struct.prototype.set = function (id, type, x, y, z, lx, ly, lz) {
 	}
 };
 
+var CarcassOfItem = function () {};
+CarcassOfItem.prototype = {
+	set _set (parameters) {
+		this.obj = {};
+		for (var i in parameters) {
+			this.obj[i] = parameters[i];	// перезапись всех свойств входящего элемента в новый.
+		}
+	},
+	get _get () {
+		return this.obj;
+	}
+};
+
+
 /**
 	Функция определения пересечения элементов.
 	Алгоритм работы:
