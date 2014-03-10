@@ -5,10 +5,21 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <script src="js/other/glMatrix-0.9.5.min.js"></script>
 <script src="js/other/jquery-2.0.3.min.js"></script>
-<script src="js/project/struct.js"></script>
-<script src="js/project/wgl.js"></script>
+
+<script src="js/project/classes/camera.js"></script>
+<script src="js/project/classes/building.js"></script>
+<script src="js/project/classes/color.js"></script>
+<script src="js/project/classes/old-item.js"></script>
+<script src="js/project/classes/keyboard.js"></script>
+<script src="js/project/classes/graph.js"></script>
+<script src="js/project/classes/set.js"></script>
+<script src="js/project/classes/struct.js"></script>
+
+<script src="js/project/logic/mouse-listener.js"></script>
+<script src="js/project/logic/wheel-listener.js"></script>
+
+<script src="js/project/tests-bugs.js"></script>
 <script src="js/project/modules.js"></script>
-<script src="js/project/funcInitScene.js"></script>
 <script src="js/project/main.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">

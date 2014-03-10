@@ -1,28 +1,3 @@
-﻿// Функция обрабатывает движение колёсика, из-за чего меняется масштаб
-// *Взята из интернета*
-function WheelListener (obj) {
-	var elem = obj.selector;
-	if (elem.addEventListener) {
-		if ('onwheel' in document) {
-			elem.addEventListener("wheel", onWheel, false);
-		} else if ('onmousewheel' in document) {
-			elem.addEventListener("mousewheel", onWheel, false);
-		} else {
-			elem.addEventListener("MozMousePixelScroll", onWheel, false);
-		}
-	} else {
-		elem.attachEvent("onmousewheel", onWheel);
-	}
-
-	function onWheel(e) {
-		e = e || window.event;
-		var delta = e.deltaY || e.detail || e.wheelDelta;
-		obj.camera.setZoom((delta > 0) ? 1.1 : 0.9);
-		obj.updateScene();
-		e.preventDefault ? e.preventDefault() : (e.returnValue = false);
-	}
-}
-
 // Обрабатывает все возможные движения мыши на холсте
 // Из-за большого количества внутренних функций, 
 // имеет смысл вынести их за её пределы
@@ -697,4 +672,9 @@ function MouseListener(elem) {
 			}
 		}
 	}
+	
+	var IsSimpleItem = function (currentItem, graph) {
+		var numberOfSelectedItems = graph.getGraph(currentItem.id).length;
+		return numberOfSelectedItems == 1 ? true : false;
+	};
 }
