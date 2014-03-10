@@ -1,47 +1,4 @@
 ﻿/**
- Класс 'Struct'.
- Описывает структуру элемента.
- @param {number} id, x,y,z,lx,ly,lz
- @param {string} type
- @returns экземпляр класса 'Struct'
-*/
-var Struct = function () {};
-Struct.prototype.set = function (id, type, x, y, z, lx, ly, lz) {
-	this.id = id;
-	this.type = type;
-	this.x = x; 
-	this.y = y; 
-	this.z = z;
-	this.lx = lx;
-	this.ly = ly;
-	this.lz = lz;
-	return {
-		id: this.id,
-		type: this.type,
-		x: this.x,
-		y: this.y,
-		z: this.z,
-		lx: this.lx,
-		ly: this.ly,
-		lz: this.lz
-	}
-};
-
-var CarcassOfItem = function () {};
-CarcassOfItem.prototype = {
-	set _set (parameters) {
-		this.obj = {};
-		for (var i in parameters) {
-			this.obj[i] = parameters[i];	// перезапись всех свойств входящего элемента в новый.
-		}
-	},
-	get _get () {
-		return this.obj;
-	}
-};
-
-
-/**
 	Функция определения пересечения элементов.
 	Алгоритм работы:
 	1. Вычисляются координаты центров входящих элементов
@@ -52,9 +9,6 @@ CarcassOfItem.prototype = {
 		сторон по каждой из осей и возвращается результат.
 */
 var isIntersects = function (a, b){
-	console.assert(a.constructor !== Struct, 'Параметр a не является экземпляром функции-конструктора Struct');
-	console.assert(b.constructor !== Struct, 'Параметр b не является экземпляром функции-конструктора Struct');
-	
 	a.center = {	// координаты центра элемента a
 		x: a.x + a.lx/2.0,
 		y: a.y + a.ly/2.0,
@@ -210,22 +164,32 @@ var Building = function(){
 	Помещает этот элемент в список элементов, если он ни с кем не пересекается
 */
 Building.prototype.addRoom = function (x, y, z, lx, ly, lz) {
-	var b = new Struct().set(Building.ID,'room',x,y,z,lx,ly,lz);	// инициализация нового объекта класса Struct
+	var room = {
+		id: Building.ID,
+		type: 'room',
+		x: x,
+		y: y,
+		z: z,
+		lx: lx,
+		ly: ly,
+		lz: lz
+	};
+	
 	if (Building.ID == 0) {
-		Building.list[Building.ID] = b;		// помещение объекта в список
+		Building.list[Building.ID] = room;		// помещение объекта в список
 		Building.ID++;
-		return b;
+		return room;
 	} else if (Building.ID > 0) {
 		var isIntersect = false;
 		for (var i in Building.list) {
-			if (isIntersects(Building.list[i], b)) {
+			if (isIntersects(Building.list[i], room)) {
 				isIntersect = true;
 			}
 		}
 		if (isIntersect == false) {
-			Building.list[Building.ID] = b;
+			Building.list[Building.ID] = room;
 			Building.ID++;
-			return b;
+			return room;
 		} else if (isIntersect == true) {
 			throw new Error('Невозможно добавить элемент с такими параметрами');
 		}
@@ -238,34 +202,42 @@ Building.prototype.addRoom = function (x, y, z, lx, ly, lz) {
  @param {number} lx,ly,lz - размеры комнаты
  @returns экземпляр класса 'Struct'
 */
-Building.prototype.addDoor = function(a, b, lx, ly, lz){	// добавление двери
-	if (a.type == 'door' || b.type == 'door' || a.id == b.id) {	// если элементы, между которыми нужно создать дверь, являются дверями
+Building.prototype.addDoor = function(room1, room2, lx, ly, lz){	// добавление двери
+	if (room1.type == 'door' || room2.type == 'door' || room1.id == room2.id) {	// если элементы, между которыми нужно создать дверь, являются дверями
 		return false;	// функция возвращает false
 	}
 	
-	var c = new Section().get(a, b, Building.list);	// определение пространства между выбранными элементами
-	lx = lx || c.lx;
-	ly = ly || c.ly;
-	lz = lz || c.lz;
-	
-	var q = undefined;
-	q = new Struct().set(Building.ID, 'door', c.x, c.y, c.z, lx, ly, lz);	// создание нового элемента с типом дверь
+	var spaceBetweenRooms = new Section().get(room1, room2, Building.list);	// определение пространства между выбранными элементами
+	lx = lx || spaceBetweenRooms.lx;
+	ly = ly || spaceBetweenRooms.ly;
+	lz = lz || spaceBetweenRooms.lz;
 
-	if (c.info == Message.SUCCESS[0]) {
-		if (q.lx <= c.lx && q.ly <= c.ly && q.lz <= c.lz) {	// проверка размеров нового элемента, 
+	var door = {
+		id: Building.ID,
+		type: 'door',
+		x: spaceBetweenRooms.x,
+		y: spaceBetweenRooms.y,
+		z: spaceBetweenRooms.z,
+		lx: lx,
+		ly: ly,
+		lz: lz
+	};
+
+	if (spaceBetweenRooms.info == Message.SUCCESS[0]) {
+		if (door.lx <= spaceBetweenRooms.lx && door.ly <= spaceBetweenRooms.ly && door.lz <= spaceBetweenRooms.lz) {	// проверка размеров нового элемента, 
 															// чтоб они не превышали размеров свободного пространства 
 															// между выделенными элементами
-			Building.list[Building.ID] = q;	// добавление элемента в список
+			Building.list[Building.ID] = door;	// добавление элемента в список
 			Building.ID++
-			return q;	// возврат нового элемента
+			return door;	// возврат нового элемента
 		} else {
 			throw Message.ERROR.GENERAL[1];
 		}
-	} else if (c.info == Message.ERROR.OBSTACLE[0]) {
+	} else if (spaceBetweenRooms.info == Message.ERROR.OBSTACLE[0]) {
 		throw Message.ERROR.OBSTACLE[1];
-	} else if (c.info == Message.ERROR.TOUCH_LEMENTS[0]) {
+	} else if (spaceBetweenRooms.info == Message.ERROR.TOUCH_LEMENTS[0]) {
 		throw Message.ERROR.TOUCH_LEMENTS[1];
-	} else if (c.info == Message.ERROR.INTERSECTION[0]) {
+	} else if (spaceBetweenRooms.info == Message.ERROR.INTERSECTION[0]) {
 		throw Message.ERROR.INTERSECTION[1];
 	}
 }
@@ -285,7 +257,8 @@ Building.prototype.getItem = function(idItem){	// получение списк�
 	return idItem === undefined ? Building.list : Building.list[idItem];
 }
 Building.prototype.updateItem = function (item) {	// обновление параметров элементов
-	Building.list[item.id] = new Struct().set(item.id, item.type, item.x, item.y, item.z, item.lx, item.ly, item.lz);
+	Building.list[item.id] = item;
+	
 	var error = false;
 	for (var i in Building.list) {
 		if (item.id != i && isIntersects(item, Building.list[i])) {	// проверка, не создаёт ли помех элемент с новыми параметрами	
@@ -299,9 +272,16 @@ Building.prototype.readBuildingFromFile = function (response) {		// response - j
 	var id;
 	for (id in response) {
 		var item = response[id];
-		var b = new Struct().set(id, item.type, parseFloat(item.x), parseFloat(item.y), parseFloat(item.z), 
-									parseFloat(item.lx), parseFloat(item.ly), parseFloat(item.lz));
-		Building.list[id] = b;
+		Building.list[id] = {
+			id: id,
+			type: item.type,
+			x: parseFloat(item.x),
+			y: parseFloat(item.y),
+			z: parseFloat(item.z),
+			lx: parseFloat(item.lx),
+			ly: parseFloat(item.ly),
+			lz: parseFloat(item.lz)
+		};
 	}
 	Building.ID = parseInt(id) + 1;
 }
