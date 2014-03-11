@@ -291,20 +291,33 @@ function MouseListener(elem) {
 							if (x < Math.max(room1.x, room2.x)) break;
 						}
 						
+						var min_X = new Set();
+						if (boxItems.TOP !== undefined) {
+							for (var i = boxItems.TOP.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.TOP[i]);
+								min_X.add(otherDoor.x);
+							}
+						}
+						if (boxItems.BOTTOM !== undefined) {
+							for (var i = boxItems.BOTTOM.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.BOTTOM[i]);
+								min_X.add(otherDoor.x);
+							}
+						}
+						if (x >= Math.min.apply(null, min_X.valueOf())) break;
+						
 						changeCurrentItem(currentItem, {x: x, lx: dlx});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
 							if (boxItems.LEFT === undefined) break;
-							
 							var local = {};
 							for (var i = boxItems.LEFT.length; --i >= 0;) {
 								local.door = building.getItem(boxItems.LEFT[i]);
 								local.door.x1 = x;
 								local.door.lx = local.door.x1 - local.door.x;
-								building.updateItem(local.door);
 								
-								// если вместо return стоит break, то условие не работает
-								if (!(local.door.lx > minSize.lx)) return;
+								if (local.door.lx < minSize.lx) return;
+								building.updateItem(local.door);
 							}
 						}
 						
@@ -321,6 +334,21 @@ function MouseListener(elem) {
 							if (x > Math.min(room1.x1, room2.x1)) break;
 						}
 						
+						var max_X = new Set();					
+						if (boxItems.TOP !== undefined) {
+							for (var i = boxItems.TOP.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.TOP[i]);
+								max_X.add(otherDoor.x1);
+							}
+						}
+						if (boxItems.BOTTOM !== undefined) {
+							for (var i = boxItems.BOTTOM.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.BOTTOM[i]);
+								max_X.add(otherDoor.x1);
+							}
+						}
+						if (x <= Math.max.apply(null, max_X.valueOf())) break;
+						
 						changeCurrentItem(currentItem, {x1: x, lx: dlx});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -333,9 +361,9 @@ function MouseListener(elem) {
 								// не будет работать изменение размера зависимого объекта
 								local.door.lx = local.door.lx + (local.door.x - x);	// 1
 								local.door.x = x;									// 2
-								building.updateItem(local.door);
 								
 								if (!(local.door.lx > minSize.lx)) return;
+								building.updateItem(local.door);
 							}
 						}
 
@@ -352,6 +380,21 @@ function MouseListener(elem) {
 							if (z < Math.max(room1.z, room2.z)) break;
 						}
 						
+						var min_Z = new Set();					
+						if (boxItems.LEFT !== undefined) {
+							for (var i = boxItems.LEFT.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.LEFT[i]);
+								min_Z.add(otherDoor.z);
+							}
+						}
+						if (boxItems.RIGHT !== undefined) {
+							for (var i = boxItems.RIGHT.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.RIGHT[i]);
+								min_Z.add(otherDoor.z);
+							}
+						}
+						if (z >= Math.min.apply(null, min_Z.valueOf())) break;
+						
 						changeCurrentItem(currentItem, {z: z, lz: dlz});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -362,10 +405,9 @@ function MouseListener(elem) {
 								local.door = building.getItem(boxItems.TOP[i]);
 								local.door.z1 = z;
 								local.door.lz = local.door.z1 - local.door.z;
-								building.updateItem(local.door);
 								
-								// если вместо return стоит break, то условие не работает
 								if (!(local.door.lz > minSize.lz)) return;
+								building.updateItem(local.door);
 							}
 						}
 						break;
@@ -381,6 +423,21 @@ function MouseListener(elem) {
 							if (z > Math.min(room1.z1, room2.z1)) break;
 						}
 						
+						var max_Z = new Set();					
+						if (boxItems.LEFT !== undefined) {
+							for (var i = boxItems.LEFT.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.LEFT[i]);
+								max_Z.add(otherDoor.z1);
+							}
+						}
+						if (boxItems.RIGHT !== undefined) {
+							for (var i = boxItems.RIGHT.length; --i >= 0;) {
+								var otherDoor = building.getItem(boxItems.RIGHT[i]);
+								max_Z.add(otherDoor.z1);
+							}
+						}
+						if (z <= Math.max.apply(null, max_Z.valueOf())) break;
+						
 						changeCurrentItem(currentItem, {z1: z, lz: dlz});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -393,9 +450,9 @@ function MouseListener(elem) {
 								// не будет работать изменение размера зависимого объекта
 								local.door.lz = local.door.lz + (local.door.z - z);	// 1
 								local.door.z = z;									// 2
-								building.updateItem(local.door);
 								
 								if (!(local.door.lz > minSize.lz)) return;
+								building.updateItem(local.door);
 							}
 						}
 						break;
@@ -614,6 +671,7 @@ function MouseListener(elem) {
 	}
 	
 	function definingNeighbors(buildingsItem, graph, currentItem, boxItems) {
+		if (graph.getGraph(currentItem.id).length == 1) return;
 		var itemsAround;
 		if (currentItem.type == 'room') {
 			itemsAround = graph.getEdge(currentItem.id);
