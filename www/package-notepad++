@@ -1,0 +1,28 @@
+<NotepadPlus>
+    <Project name="planeditor.org">
+        <Folder name="other">
+            <File name="js\other\glMatrix-0.9.5.min.js" />
+            <File name="js\other\jquery-2.0.3.min.js" />
+        </Folder>
+        <Folder name="project">
+            <Folder name="classes">
+                <File name="js\project\classes\building.js" />
+                <File name="js\project\classes\camera.js" />
+                <File name="js\project\classes\color.js" />
+                <File name="js\project\classes\graph.js" />
+                <File name="js\project\classes\keyboard.js" />
+                <File name="js\project\classes\old-item.js" />
+                <File name="js\project\classes\set.js" />
+                <File name="js\project\classes\struct.js" />
+            </Folder>
+            <Folder name="logic">
+                <File name="js\project\logic\mouse-listener.js" />
+                <File name="js\project\logic\wheel-listener.js" />
+            </Folder>
+            <File name="js\project\main.js" />
+            <File name="js\project\modules.js" />
+            <File name="js\project\tests-bugs.js" />
+        </Folder>
+        <File name="index.php" />
+    </Project>
+</NotepadPlus>
