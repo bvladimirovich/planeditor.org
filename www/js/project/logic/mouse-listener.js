@@ -18,13 +18,10 @@ function MouseListener(elem) {
 		}
 	}
 	
-	// previousSettingsItem - хранит в себе параметры элемента до изменения.
-	// *В этом классе нужно применить геттеры и сеттеры
-	//var previousSettingsItem = new OldItem();
-	
 	// Метод, который занимается обработкой движений в области холста
 	function Draggable() {
 		// Локальные переменные метода
+		
 		// Выбранный элемент
 		// *Используется во многих функциях метода,
 		// возможно, есть смысл сделать его глобальным
@@ -33,6 +30,7 @@ function MouseListener(elem) {
 			sideChanges = undefined;
 		
 		// Логические операторы действий
+		
 		// Оператор разрешения перемещения камеры
 		// Переименовать в moveCameraStatus
 		var moveCamera = false,
@@ -45,28 +43,13 @@ function MouseListener(elem) {
 		// камеры,
 		var prevXd,
 			prevZd,
-		// элемента
 			prevXm,
+		// элемента
 			prevZm; 
 		
 		// Коробка для хранения объектов, которые соединены с выбранным
 		var boxItems;
 		
-		// Коды клавиш
-		// *Возможно, нужно вынести этот объект за пределы метода в модуль
-		var keyCode = {
-			SHIFT: 16,
-			CTRL: 17,
-			ALT: 18,
-			DELETE: 46
-		};
-		
-		// Кодировки цветов для выделения (RGBA)
-		// *Возможно, нужно вынести этот объект за пределы метода в модуль
-		var color = {
-			RED: [1.0, 0.0, 0.0, 1.0],
-			TURQUOISE: [0.0, 1.0, 1.0, 1.0]
-		};
 		// Установка цвета выделения по умолчанию
 		Color.val = color.TURQUOISE;
 		
@@ -76,6 +59,7 @@ function MouseListener(elem) {
 			// В первую очередь обрабатывается нажатие правой кнопки мыши
 			// для изменения положения камеры
 			var isRightButton = defineRightButton(ev);
+			
 			// Если нажата правая кнопка мыши
 			// сохраняются координаты в момент нажатия
 			// разрешается возможность изменения положения камеры
@@ -103,12 +87,12 @@ function MouseListener(elem) {
 						y: 0.1,
 						z: z - sizeNewItem.lz / 2.0
 					};
-					_global_.Building.addRoom(positionNewItem.x, positionNewItem.y, positionNewItem.z,
+					building.addRoom(positionNewItem.x, positionNewItem.y, positionNewItem.z,
 						sizeNewItem.lx, sizeNewItem.ly, sizeNewItem.lz);
 				}
 				
 				// Получение объекта
-				currentItem = findItem(x, z, _global_.Building.getItem());
+				currentItem = findItem(x, z, building.getItem());
 				// Условия работы с объектом
 				if (currentItem !== undefined) {
 					// 
@@ -120,7 +104,7 @@ function MouseListener(elem) {
 					// !По какой-то причине с первого клика соседние элементы не определяются
 					// Одна из возможных причин: переменная graph еще не заполнена, необходимо проверить.
 					boxItems = {};
-					definingNeighbors(_global_.Building.getItem(), graph, currentItem, boxItems);
+					definingNeighbors(building.getItem(), graph, currentItem, boxItems);
 					console.warn(boxItems);
 					// Массив выделенных элементов
 					// Применяется для создания дверей между комнатами и выделения цветом
@@ -133,9 +117,9 @@ function MouseListener(elem) {
 						moveItem = false;
 						resizeItem = false;
 						// Получение из выделенных первого
-						var previousItem = _global_.Building.getItem(arrayItems[0]);
+						var previousItem = building.getItem(arrayItems[0]);
 						// Все элементы на холсте
-						var allItems = _global_.Building.getItem();
+						var allItems = building.getItem();
 						// Получение пространства между комнатами
 						// *Возможно, применение геттеров и сеттеров упростит запись и сделает ее красивее
 						var spaceBetweenRooms = new Section().get(previousItem, currentItem, allItems);
@@ -166,7 +150,7 @@ function MouseListener(elem) {
 							// Обработка удовлетворения условиям
 							if (responseMessage === 'success') {
 								// И создание двери между выбранными комнатами
-								var door = _global_.Building.addDoor(previousItem, currentItem);
+								var door = building.addDoor(previousItem, currentItem);
 								// Выделение цветом новой двери в связке с комнатами
 								highlightedItems.add(door.id);
 								// Добавление ребра (двери) между узлами (комнатами) в граф
@@ -217,7 +201,7 @@ function MouseListener(elem) {
 					// Определение выбранной грани
 					// Зона для появления значка изменения размера зависит от масштаба
 					// Чем крупнее, тем зона меньше
-					var side = findBorder(x, z, _global_.Building.getItem(currentItem.id), cameraControl.getZoom());
+					var side = findBorder(x, z, building.getItem(currentItem.id), cameraControl.getZoom());
 					if (side != undefined) {
 						// В момент изменения размеров запрещается перемещение объекта
 						moveItem = false;
@@ -281,7 +265,7 @@ function MouseListener(elem) {
 			} else if (moveItem) {
 				currentItem.x = x - prevXm,
 				currentItem.z = z - prevZm;
-				var ERROR = _global_.Building.updateItem(currentItem);
+				var ERROR = building.updateItem(currentItem);
 				if (ERROR) {
 					Color.val = color.RED;
 				} else {
@@ -300,23 +284,7 @@ function MouseListener(elem) {
 						if (!(dlx > minSize.lx)) break;
 						
 						if (currentItem.type == 'door') {
-							var door = currentItem;
-							var nodes = graph.getNode(door.id);
-							
-							var firstNode = _global_.Building.getItem(nodes[0]);
-							var secondNode = _global_.Building.getItem(nodes[1]);
-							
-							var dx = firstNode.center.x - secondNode.center.x;
-							if (dx > (firstNode.lx/2 + secondNode.lx/2)) break;
-							
-							// код ниже не работает
-							// --- start ---
-							var marginalPosition = Math.max(firstNode.x, secondNode.x);
-							console.log(currentItem.x, marginalPosition);
-							if (currentItem.x < marginalPosition) {
-								break;
-							}
-							// --- end ---
+							if (boxItems.LEFT !== undefined) break;
 						}
 						
 						changeCurrentItem(currentItem, {x: x, lx: dlx});
@@ -326,10 +294,10 @@ function MouseListener(elem) {
 							
 							var local = {};
 							for (var i = boxItems.LEFT.length; --i >= 0;) {
-								local.door = _global_.Building.getItem(boxItems.LEFT[i]);
+								local.door = building.getItem(boxItems.LEFT[i]);
 								local.door.x1 = x;
 								local.door.lx = local.door.x1 - local.door.x;
-								_global_.Building.updateItem(local.door);
+								building.updateItem(local.door);
 								
 								// если вместо return стоит break, то условие не работает
 								if (!(local.door.lx > minSize.lx)) return;
@@ -340,6 +308,10 @@ function MouseListener(elem) {
 						dlx = currentItem.lx + (x - currentItem.x1);
 						if (!(dlx > minSize.lx)) break;
 						
+						if (currentItem.type == 'door') {
+							if (boxItems.RIGHT !== undefined) break;
+						}
+						
 						changeCurrentItem(currentItem, {x1: x, lx: dlx});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -347,12 +319,12 @@ function MouseListener(elem) {
 							
 							var local = {};
 							for (var i = boxItems.RIGHT.length; --i >= 0;) {
-								local.door = _global_.Building.getItem(boxItems.RIGHT[i]);
+								local.door = building.getItem(boxItems.RIGHT[i]);
 								// если поменять строчки 1 и 2 местами
 								// не будет работать изменение размера зависимого объекта
 								local.door.lx = local.door.lx + (local.door.x - x);	// 1
 								local.door.x = x;									// 2
-								_global_.Building.updateItem(local.door);
+								building.updateItem(local.door);
 								
 								if (!(local.door.lx > minSize.lx)) return;
 							}
@@ -363,6 +335,10 @@ function MouseListener(elem) {
 						dlz = currentItem.lz + (currentItem.z - z);
 						if (!(dlz > minSize.lz)) break;
 
+						if (currentItem.type == 'door') {
+							if (boxItems.TOP !== undefined) break;
+						}
+						
 						changeCurrentItem(currentItem, {z: z, lz: dlz});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -370,10 +346,10 @@ function MouseListener(elem) {
 							
 							var local = {};
 							for (var i = boxItems.TOP.length; --i >= 0;) {
-								local.door = _global_.Building.getItem(boxItems.TOP[i]);
+								local.door = building.getItem(boxItems.TOP[i]);
 								local.door.z1 = z;
 								local.door.lz = local.door.z1 - local.door.z;
-								_global_.Building.updateItem(local.door);
+								building.updateItem(local.door);
 								
 								// если вместо return стоит break, то условие не работает
 								if (!(local.door.lz > minSize.lz)) return;
@@ -384,6 +360,10 @@ function MouseListener(elem) {
 						dlz = currentItem.lz + (z - currentItem.z1);
 						if (!(dlz > minSize.lz)) break;
 						
+						if (currentItem.type == 'door') {
+							if (boxItems.BOTTOM !== undefined) break;
+						}
+						
 						changeCurrentItem(currentItem, {z1: z, lz: dlz});
 						
 						if (!IsSimpleItem(currentItem, graph)) {
@@ -391,12 +371,12 @@ function MouseListener(elem) {
 							
 							var local = {};
 							for (var i = boxItems.BOTTOM.length; --i >= 0;) {
-								local.door = _global_.Building.getItem(boxItems.BOTTOM[i]);
+								local.door = building.getItem(boxItems.BOTTOM[i]);
 								// если поменять строчки 1 и 2 местами
 								// не будет работать изменение размера зависимого объекта
 								local.door.lz = local.door.lz + (local.door.z - z);	// 1
 								local.door.z = z;									// 2
-								_global_.Building.updateItem(local.door);
+								building.updateItem(local.door);
 								
 								if (!(local.door.lz > minSize.lz)) return;
 							}
@@ -462,7 +442,7 @@ function MouseListener(elem) {
 						console.log('Непонятки');
 						break;
 				}
-				var ERROR = _global_.Building.updateItem(currentItem);
+				var ERROR = building.updateItem(currentItem);
 				if (ERROR) {
 					Color.val = color.RED;
 				} else {
@@ -472,13 +452,13 @@ function MouseListener(elem) {
 			} else {
 				
 				if (highlightedItems.valueOf().length > 0 && key.getKeyCode() === undefined) {
-					currentItem = findItem(x, z, _global_.Building.getItem());
+					currentItem = findItem(x, z, building.getItem());
 					if (currentItem !== undefined) {						
 						if (highlightedItems.has(currentItem.id)) {
 							findBorder(x, z, currentItem, cameraControl.getZoom());
 						}
 					} else {
-						findBorder(x, z, _global_.Building.getItem(highlightedItems.valueOf()[0]), cameraControl.getZoom());
+						findBorder(x, z, building.getItem(highlightedItems.valueOf()[0]), cameraControl.getZoom());
 					}
 				}
 			}
@@ -507,7 +487,7 @@ function MouseListener(elem) {
 			
 			if (key.getKeyCode() == keyCode.DELETE) {
 				if (currentItem !== undefined) {
-					var deletedItem = _global_.Building.removeItem(currentItem.id);
+					var deletedItem = building.removeItem(currentItem.id);
 					if (graph.remove(currentItem.id)) {
 						console.info('Удален элеменет "' + deletedItem.type + '"', deletedItem);
 					}
@@ -516,13 +496,13 @@ function MouseListener(elem) {
 			
 			drawScene(cameraControl, highlightedItems, Color.val);
 			
-			//var str = JSON.stringify(_global_.Building.getItem(), "", 4);
+			//var str = JSON.stringify(building.getItem(), "", 4);
 			//console.log(str);
 			
 			function returnPreviousValue () {
-				var ERROR = _global_.Building.updateItem(currentItem);
+				var ERROR = building.updateItem(currentItem);
 				if (ERROR) {
-					_global_.Building.updateItem(OldItem.val);
+					building.updateItem(OldItem.val);
 					Color.val = color.TURQUOISE;
 				}
 			}
@@ -616,64 +596,65 @@ function MouseListener(elem) {
 		return borderDoor;
 	}
 	
-	function definingNeighbors(building, graph, currentItem, boxItems) {
-		var nodesOfGraphTotal = graph.getGraph(currentItem.id).length;
-		if (nodesOfGraphTotal > 1) {
-			if (currentItem.type !== 'room') return
-			var arrDoorsId = graph.getEdge(currentItem.id);
-			var doorsOfRoomTotal = arrDoorsId.length;
+	function definingNeighbors(buildingsItem, graph, currentItem, boxItems) {
+		var itemsAround;
+		if (currentItem.type == 'room') {
+			itemsAround = graph.getEdge(currentItem.id);
+		} else if (currentItem.type == 'door') {
+			itemsAround = graph.getNode(currentItem.id);
+		}
+		
+		var itemsAroundTotal = itemsAround.length;
+		
+		var boxLeftItems = new Set();
+		var boxRightItems = new Set();
+		var boxTopItems = new Set();
+		var boxButtomItems = new Set();
+
+		for (var i = itemsAroundTotal; --i >= 0;) {
+			var entityItem = buildingsItem[itemsAround[i]];
+			currentItem.center = {
+				x: currentItem.x + currentItem.lx/2.0,
+				y: currentItem.y + currentItem.ly/2.0,
+				z: currentItem.z + currentItem.lz/2.0
+			};
+			entityItem.center = {
+				x: entityItem.x + entityItem.lx/2.0,
+				y: entityItem.y + entityItem.ly/2.0,
+				z: entityItem.z + entityItem.lz/2.0
+			};
 			
-			var boxLeftItems = new Set();
-			var boxRightItems = new Set();
-			var boxTopItems = new Set();
-			var boxButtomItems = new Set();
+			var dx = currentItem.center.x - entityItem.center.x,	// расстояние между центрами
+				dy = currentItem.center.y - entityItem.center.y,	// элементов
+				dz = currentItem.center.z - entityItem.center.z;
 
-			for (var i = doorsOfRoomTotal; --i >= 0;) {
-				var door = _global_.Building.getItem(arrDoorsId[i]);
-				currentItem.center = {
-					x: currentItem.x + currentItem.lx/2.0,
-					y: currentItem.y + currentItem.ly/2.0,
-					z: currentItem.z + currentItem.lz/2.0
-				};
-				door.center = {
-					x: door.x + door.lx/2.0,
-					y: door.y + door.ly/2.0,
-					z: door.z + door.lz/2.0
-				};
-				
-				var dx = currentItem.center.x - door.center.x,	// расстояние между центрами
-					dy = currentItem.center.y - door.center.y,	// элементов
-					dz = currentItem.center.z - door.center.z;
-
-				if (dx < 0) {
-					if (currentItem.x1 == door.x) {
-						boxRightItems.add(door.id);
-						boxItems.RIGHT = boxRightItems.valueOf();
-					}
-				} else if (dx > 0) {
-					if (currentItem.x == door.x1) {
-						boxLeftItems.add(door.id);
-						boxItems.LEFT = boxLeftItems.valueOf();
-					}
+			if (dx < 0) {
+				if (currentItem.x1 == entityItem.x) {
+					boxRightItems.add(entityItem.id);
+					boxItems.RIGHT = boxRightItems.valueOf();
 				}
-				
-				if (dz < 0) {
-					if (currentItem.z1 == door.z) {
-						boxButtomItems.add(door.id);
-						boxItems.BOTTOM = boxButtomItems.valueOf();
-					}
-				} else if (dz > 0) {
-					if (currentItem.z == door.z1) {
-						boxTopItems.add(door.id);
-						boxItems.TOP = boxTopItems.valueOf();
-					}
+			} else if (dx > 0) {
+				if (currentItem.x == entityItem.x1) {
+					boxLeftItems.add(entityItem.id);
+					boxItems.LEFT = boxLeftItems.valueOf();
 				}
-				
+			}
+			
+			if (dz < 0) {
+				if (currentItem.z1 == entityItem.z) {
+					boxButtomItems.add(entityItem.id);
+					boxItems.BOTTOM = boxButtomItems.valueOf();
+				}
+			} else if (dz > 0) {
+				if (currentItem.z == entityItem.z1) {
+					boxTopItems.add(entityItem.id);
+					boxItems.TOP = boxTopItems.valueOf();
+				}
 			}
 		}
 	}
 	
-	var IsSimpleItem = function (currentItem, graph) {
+	function IsSimpleItem(currentItem, graph) {
 		var numberOfSelectedItems = graph.getGraph(currentItem.id).length;
 		return numberOfSelectedItems == 1 ? true : false;
 	};
