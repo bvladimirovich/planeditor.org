@@ -19,8 +19,11 @@
                 <File name="js\project\logic\mouse-listener.js" />
                 <File name="js\project\logic\wheel-listener.js" />
             </Folder>
+            <Folder name="const-value">
+                <File name="js\project\const-value\color-codes.js" />
+                <File name="js\project\const-value\key-codes.js" />
+            </Folder>
             <File name="js\project\main.js" />
-            <File name="js\project\modules.js" />
             <File name="js\project\tests-bugs.js" />
         </Folder>
         <File name="index.php" />

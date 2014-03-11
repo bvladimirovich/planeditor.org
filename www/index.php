@@ -18,8 +18,10 @@
 <script src="js/project/logic/mouse-listener.js"></script>
 <script src="js/project/logic/wheel-listener.js"></script>
 
+<script src="js/project/const-value/color-codes.js"></script>
+<script src="js/project/const-value/key-codes.js"></script>
+
 <script src="js/project/tests-bugs.js"></script>
-<script src="js/project/modules.js"></script>
 <script src="js/project/main.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
