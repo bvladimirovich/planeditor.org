@@ -154,8 +154,8 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 	// gl.uniform4fv(shaderProgramGrid.uColor, [1.0, 1.0, 1.0, 1.0]);
 	// gl.drawArrays(gl.LINES, 0, gridVertexPositionBuffer.numItems);
 	
-	for (var i in _global_.Building.getItem()){
-		var item = _global_.Building.getItem(i);
+	for (var i in building.getItem()){
+		var item = building.getItem(i);
 		if (item === undefined) continue;
 		var	dx = item.x + item.lx * 0.5,
 			dz = item.z + item.lz * 0.5,
@@ -207,13 +207,12 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 */
 
 // Глобальные переменные.
-// Их необходимо спрятать в модуль.
-// Так будет и удобнее, и безопаснее
 var cameraControl;
 var highlightedItems;
 var highlightColor;
 var graph;
 var key;
+var building;
 function initScene(elem) {
 	console.time('Время загрузки initScene()');
 	
@@ -241,7 +240,7 @@ function initScene(elem) {
 	
 	// Building - объект класса Building / Здание
 	// Хранит все объекты, отображаемые на холсте
-	_global_.Building = new Building();
+	building = new Building();
 	
 	// Объект класса Graph/Граф
 	graph = new Graph();
@@ -266,7 +265,7 @@ function initScene(elem) {
 	// Запуск функций, которые выполняют работу с холстом
 	// и объектами на нем
 	WheelListener(obj);
-	MouseListener(elem);
+	MouseListener(obj.selector);
 	
 	// Первая отрисовка холста
 	obj.updateScene();
@@ -277,7 +276,7 @@ function initScene(elem) {
 function initNavigation() {
 	$('#saveProject').click(function () {
 		var objForSave = {};
-		for (var item in _global_.Building.getItem()) {
+		for (var item in building.getItem()) {
 			var graphForSave = graph.getGraph(item);
 			if (graphForSave.length < 2) continue;
 			
@@ -294,7 +293,7 @@ function initNavigation() {
 			url: 'cgi-php/saveProject.php',
 			type: 'post',
 			data: {
-				build: _global_.Building.getItem(),
+				build: building.getItem(),
 				graph: objForSave,
 			},
 			success: function (data, code) {
@@ -313,7 +312,7 @@ function initNavigation() {
 			type: 'post',
 			dataType: 'json',
 			success: function (response, code) {
-				_global_.Building.readBuildingFromFile(response);
+				building.readBuildingFromFile(response);
 				drawScene(cameraControl, highlightedItems, Color.val);
 			},
 			error: function(xhr, str) {
