@@ -285,6 +285,10 @@ function MouseListener(elem) {
 						
 						if (currentItem.type == 'door') {
 							if (boxItems.LEFT !== undefined) break;
+							var room1 = building.getItem(graph.getNode(currentItem.id)[0]);
+							var room2 = building.getItem(graph.getNode(currentItem.id)[1]);
+							
+							if (x < Math.max(room1.x, room2.x)) break;
 						}
 						
 						changeCurrentItem(currentItem, {x: x, lx: dlx});
@@ -303,6 +307,7 @@ function MouseListener(elem) {
 								if (!(local.door.lx > minSize.lx)) return;
 							}
 						}
+						
 						break;
 					case 'right': // изменяем размер вправо
 						dlx = currentItem.lx + (x - currentItem.x1);
@@ -310,6 +315,10 @@ function MouseListener(elem) {
 						
 						if (currentItem.type == 'door') {
 							if (boxItems.RIGHT !== undefined) break;
+							var room1 = building.getItem(graph.getNode(currentItem.id)[0]);
+							var room2 = building.getItem(graph.getNode(currentItem.id)[1]);
+							
+							if (x > Math.min(room1.x1, room2.x1)) break;
 						}
 						
 						changeCurrentItem(currentItem, {x1: x, lx: dlx});
@@ -337,6 +346,10 @@ function MouseListener(elem) {
 
 						if (currentItem.type == 'door') {
 							if (boxItems.TOP !== undefined) break;
+							var room1 = building.getItem(graph.getNode(currentItem.id)[0]);
+							var room2 = building.getItem(graph.getNode(currentItem.id)[1]);
+							
+							if (z < Math.max(room1.z, room2.z)) break;
 						}
 						
 						changeCurrentItem(currentItem, {z: z, lz: dlz});
@@ -362,6 +375,10 @@ function MouseListener(elem) {
 						
 						if (currentItem.type == 'door') {
 							if (boxItems.BOTTOM !== undefined) break;
+							var room1 = building.getItem(graph.getNode(currentItem.id)[0]);
+							var room2 = building.getItem(graph.getNode(currentItem.id)[1]);
+							
+							if (z > Math.min(room1.z1, room2.z1)) break;
 						}
 						
 						changeCurrentItem(currentItem, {z1: z, lz: dlz});
