@@ -104,7 +104,7 @@ function MouseListener(elem) {
 					// !По какой-то причине с первого клика соседние элементы не определяются
 					// Одна из возможных причин: переменная graph еще не заполнена, необходимо проверить.
 					boxItems = {};
-					definingNeighbors(building.getItem(), graph, currentItem, boxItems);
+					definingNeighbors(building, graph, currentItem, boxItems);
 					console.warn(boxItems);
 					// Массив выделенных элементов
 					// Применяется для создания дверей между комнатами и выделения цветом
@@ -678,7 +678,7 @@ function MouseListener(elem) {
 		return borderDoor;
 	}
 	
-	function definingNeighbors(buildingsItem, graph, currentItem, boxItems) {
+	function definingNeighbors(building, graph, currentItem, boxItems) {
 		if (graph.getGraph(currentItem.id).length == 1) return;
 		var itemsAround;
 		if (currentItem.type == 'room') {
@@ -695,7 +695,9 @@ function MouseListener(elem) {
 		var boxButtomItems = new Set();
 
 		for (var i = itemsAroundTotal; --i >= 0;) {
-			var entityItem = buildingsItem[itemsAround[i]];
+			var entityItem = building.getItem(itemsAround[i]);
+			if (entityItem === undefined) continue;
+			
 			currentItem.center = {
 				x: currentItem.x + currentItem.lx/2.0,
 				y: currentItem.y + currentItem.ly/2.0,
