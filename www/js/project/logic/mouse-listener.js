@@ -306,21 +306,25 @@ function MouseListener(elem) {
 						}
 						if (x >= Math.min.apply(null, min_X.valueOf())) break;
 						
-						changeCurrentItem(currentItem, {x: x, lx: dlx});
 						
-						if (!IsSimpleItem(currentItem, graph)) {
-							if (boxItems.LEFT === undefined) break;
-							var local = {};
-							for (var i = boxItems.LEFT.length; --i >= 0;) {
-								local.door = building.getItem(boxItems.LEFT[i]);
-								local.door.x1 = x;
-								local.door.lx = local.door.x1 - local.door.x;
-								
-								if (local.door.lx < minSize.lx) return;
-								building.updateItem(local.door);
+						var limitChanges = new Set();
+						var roomsLeft = boxItems.LEFT;
+						if (roomsLeft !== undefined) {
+							var door = {};
+							for (var i = roomsLeft.length; --i >= 0;) {
+								door[i] = building.getItem(roomsLeft[i]);
+								limitChanges.add(door[i].x + minSize.lx);
+							}
+							
+							if (x <= Math.max.apply(null, limitChanges.valueOf())) break;
+							
+							for (var i = roomsLeft.length; --i >= 0;) {
+								door[i].x1 = x;
+								door[i].lx = door[i].x1 - door[i].x;
 							}
 						}
 						
+						changeCurrentItem(currentItem, {x: x, lx: dlx});
 						break;
 					case 'right': // изменяем размер вправо
 						dlx = currentItem.lx + (x - currentItem.x1);
@@ -349,24 +353,24 @@ function MouseListener(elem) {
 						}
 						if (x <= Math.max.apply(null, max_X.valueOf())) break;
 						
-						changeCurrentItem(currentItem, {x1: x, lx: dlx});
-						
-						if (!IsSimpleItem(currentItem, graph)) {
-							if (boxItems.RIGHT === undefined) break;
+						var limitChanges = new Set();
+						var roomsRight = boxItems.RIGHT;
+						if (roomsRight !== undefined) {
+							var door = {};
+							for (var i = roomsRight.length; --i >= 0;) {
+								door[i] = building.getItem(roomsRight[i]);
+								limitChanges.add(door[i].x1 - minSize.lx);
+							}
 							
-							var local = {};
-							for (var i = boxItems.RIGHT.length; --i >= 0;) {
-								local.door = building.getItem(boxItems.RIGHT[i]);
-								// если поменять строчки 1 и 2 местами
-								// не будет работать изменение размера зависимого объекта
-								local.door.lx = local.door.lx + (local.door.x - x);	// 1
-								local.door.x = x;									// 2
-								
-								if (!(local.door.lx > minSize.lx)) return;
-								building.updateItem(local.door);
+							if (x >= Math.min.apply(null, limitChanges.valueOf())) break;
+							
+							for (var i = roomsRight.length; --i >= 0;) {
+								door[i].lx = door[i].lx + (door[i].x - x);
+								door[i].x = x;
 							}
 						}
 
+						changeCurrentItem(currentItem, {x1: x, lx: dlx});
 						break;
 					case 'top': // изменяем размер вверх
 						dlz = currentItem.lz + (currentItem.z - z);
@@ -395,21 +399,24 @@ function MouseListener(elem) {
 						}
 						if (z >= Math.min.apply(null, min_Z.valueOf())) break;
 						
-						changeCurrentItem(currentItem, {z: z, lz: dlz});
-						
-						if (!IsSimpleItem(currentItem, graph)) {
-							if (boxItems.TOP === undefined) break;
+						var limitChanges = new Set();
+						var roomsTop = boxItems.TOP;
+						if (roomsTop !== undefined) {
+							var door = {};
+							for (var i = roomsTop.length; --i >= 0;) {
+								door[i] = building.getItem(roomsTop[i]);
+								limitChanges.add(door[i].z + minSize.lz);
+							}
 							
-							var local = {};
-							for (var i = boxItems.TOP.length; --i >= 0;) {
-								local.door = building.getItem(boxItems.TOP[i]);
-								local.door.z1 = z;
-								local.door.lz = local.door.z1 - local.door.z;
-								
-								if (!(local.door.lz > minSize.lz)) return;
-								building.updateItem(local.door);
+							if (z <= Math.max.apply(null, limitChanges.valueOf())) break;
+							
+							for (var i = roomsTop.length; --i >= 0;) {
+								door[i].z1 = z;
+								door[i].lz = door[i].z1 - door[i].z;
 							}
 						}
+
+						changeCurrentItem(currentItem, {z: z, lz: dlz});
 						break;
 					case 'bottom': // изменяем размер вниз
 						dlz = currentItem.lz + (z - currentItem.z1);
@@ -437,24 +444,25 @@ function MouseListener(elem) {
 							}
 						}
 						if (z <= Math.max.apply(null, max_Z.valueOf())) break;
-						
-						changeCurrentItem(currentItem, {z1: z, lz: dlz});
-						
-						if (!IsSimpleItem(currentItem, graph)) {
-							if (boxItems.BOTTOM === undefined) break;
+					
+						var limitChanges = new Set();
+						var roomsBottom = boxItems.BOTTOM;
+						if (roomsBottom !== undefined) {
+							var door = {};
+							for (var i = roomsBottom.length; --i >= 0;) {
+								door[i] = building.getItem(roomsBottom[i]);
+								limitChanges.add(door[i].z1 - minSize.lz);
+							}
 							
-							var local = {};
-							for (var i = boxItems.BOTTOM.length; --i >= 0;) {
-								local.door = building.getItem(boxItems.BOTTOM[i]);
-								// если поменять строчки 1 и 2 местами
-								// не будет работать изменение размера зависимого объекта
-								local.door.lz = local.door.lz + (local.door.z - z);	// 1
-								local.door.z = z;									// 2
-								
-								if (!(local.door.lz > minSize.lz)) return;
-								building.updateItem(local.door);
+							if (z >= Math.min.apply(null, limitChanges.valueOf())) break;
+							
+							for (var i = roomsBottom.length; --i >= 0;) {
+								door[i].lz = door[i].lz + (door[i].z - z);
+								door[i].z = z;
 							}
 						}
+						
+						changeCurrentItem(currentItem, {z1: z, lz: dlz});
 						break;
 					case 'topLeft':
 						if (!IsSimpleItem(currentItem, graph)) return;
