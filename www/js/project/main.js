@@ -174,9 +174,12 @@ function initTexture() {
 function handleLoadedTexture(texture) {
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); 
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 	gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
@@ -187,7 +190,7 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
     mat4.ortho(cameraControl.get().l, cameraControl.get().r, cameraControl.get().b, cameraControl.get().t, 0.1, 100.0, pvMatrix);
 	mat4.rotateX(pvMatrix, Math.PI/2.0);
 	
-	createTexture();
+	createTexture(neheTexture);
 	createObjects();
 	
 	function createObjects() {
@@ -234,7 +237,7 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 		gl.disableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 	}
 	
-	function createTexture() {			
+	function createTexture(texture) {			
 		gl.useProgram(shaderProgramTex);
 		gl.enableVertexAttribArray(shaderProgramTex.vertexPositionAttribute);
 		//gl.enableVertexAttribArray(shaderProgramTex.vertexTextureCoord);
@@ -246,13 +249,13 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
 		gl.uniformMatrix4fv(shaderProgramTex.pvMatrix, false, pvMatrix);
 		
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, neheTexture);
-		gl.uniform1i(shaderProgram.samplerUniform, 0);
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.uniform1i(shaderProgramTex.uSampler, 0);
 		
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 		
 		gl.disableVertexAttribArray(shaderProgramTex.vertexPositionAttribute);
-		//gl.disableVertexAttribArray(shaderProgramTex.vertexTextureCoord);/**/
+		//gl.disableVertexAttribArray(shaderProgramTex.vertexTextureCoord);
 	}
 }
 
