@@ -49,40 +49,50 @@ function getShader(gl, id) {
 		alert(gl.getShaderInfoLog(shader));
 		return null;
 	}
-
+	
 	return shader;
+}
+
+var setShaders = function (shaderFS, shaderVS) {
+	var fragmentShader = getShader(gl, shaderFS);
+	var vertexShader = getShader(gl, shaderVS);
+
+	var locShaderProgram = gl.createProgram();
+	gl.attachShader(locShaderProgram, vertexShader);
+	gl.attachShader(locShaderProgram, fragmentShader);
+	gl.linkProgram(locShaderProgram);
+
+	if (!gl.getProgramParameter(locShaderProgram, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
+
+	gl.useProgram(locShaderProgram);
+
+	return locShaderProgram;
 }
 
 var shaderProgram;
 var shaderProgramGrid;
-
+var shaderProgramTex;
 function initShaders() {
-	//shaderProgramGrid = setShaders('shader-fs-grid', 'shader-vs-grid');
-	shaderProgram = setShaders('shader-fs', 'shader-vs');
-	
-	function setShaders(shaderFS, shaderVS) {
-		var fragmentShader = getShader(gl, shaderFS);
-		var vertexShader = getShader(gl, shaderVS);
-
-		var locShaderProgram = gl.createProgram();
-		gl.attachShader(locShaderProgram, vertexShader);
-		gl.attachShader(locShaderProgram, fragmentShader);
-		gl.linkProgram(locShaderProgram);
-
-		if (!gl.getProgramParameter(locShaderProgram, gl.LINK_STATUS)) {
-			alert("Could not initialise shaders");
-		}
-
-		gl.useProgram(locShaderProgram);
-
-		locShaderProgram.vertexPositionAttribute = gl.getAttribLocation(locShaderProgram, "aVertexPosition");
-		gl.enableVertexAttribArray(locShaderProgram.vertexPositionAttribute);
-
-		locShaderProgram.pvMatrixUniform = gl.getUniformLocation(locShaderProgram, "uPVMatrix");
-		locShaderProgram.mMatrixUniform = gl.getUniformLocation(locShaderProgram, "uMMatrix");
-		locShaderProgram.uColor = gl.getUniformLocation(locShaderProgram, "uColor");
+	shaderProgram = new setShaders('shader-fs', 'shader-vs');
+	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+	shaderProgram.pvMatrixUniform = gl.getUniformLocation(shaderProgram, "uPVMatrix");
+	shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
+	shaderProgram.uColor = gl.getUniformLocation(shaderProgram, "uColor");
 		
-		return locShaderProgram;
+	shaderProgramTex = new setShaders('shader-fs-tex', 'shader-vs-tex');
+	shaderProgramTex.vertexPositionAttribute = gl.getAttribLocation(shaderProgramTex, "aVertexPosition");
+	shaderProgramTex.vertexTextureCoord = gl.getAttribLocation(shaderProgramTex, "aTextureCoord");
+	shaderProgramTex.pvMatrixUniform = gl.getUniformLocation(shaderProgramTex, "uPVMatrix");
+	shaderProgramTex.uColor = gl.getUniformLocation(shaderProgramTex, "uSampler");
+	
+	//shaderProgramGrid = setShaders('shader-fs-grid', 'shader-vs-grid');
+}
+
+function bindUniformLocation(programm, arrNames) {
+	for (var i = arrNames.length; --i >=0;) {
+		programm[arrNames[i]] = gl.getUniformLocation(programm, arrNames[i]);
 	}
 }
 
@@ -93,6 +103,7 @@ var pvMatrix = mat4.create();
 var squareVertexPositionBuffer;
 var borderVertexPositionBuffer;
 var gridVertexPositionBuffer;
+var textureVertexPositionBuffer;
 
 function initBuffers() {
 	squareVertexPositionBuffer = gl.createBuffer();
@@ -123,6 +134,18 @@ function initBuffersBorder() {
 	borderVertexPositionBuffer.numItems = 5;
 }
 
+function initBuffersTexture() {
+	textureVertexPositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexPositionBuffer);
+	vertices = [
+		 1.0, 0.0,  1.0, 1.0, 0.0,
+		-1.0, 0.0,  1.0, 0.0, 0.0,
+		 1.0, 0.0, -1.0, 1.0, 1.0,
+		-1.0, 0.0, -1.0, 0.0, 1.0
+	];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
+
 function initBuffersGrid() {
 	var arr = [];
 	for (var i = 0; i < 100; i++) {
@@ -139,6 +162,24 @@ function initBuffersGrid() {
 	gridVertexPositionBuffer.numItems = arr.length/2;
 }
 
+var neheTexture;
+function initTexture() {
+	neheTexture = gl.createTexture();
+	neheTexture.image = new Image();
+	neheTexture.image.src = "/img/plan.gif";
+	neheTexture.image.onload = function() {
+		handleLoadedTexture(neheTexture)
+	}
+}
+function handleLoadedTexture(texture) {
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
 function drawScene(cameraControl, highlightedItems, highlightColor) {
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -146,53 +187,72 @@ function drawScene(cameraControl, highlightedItems, highlightColor) {
     mat4.ortho(cameraControl.get().l, cameraControl.get().r, cameraControl.get().b, cameraControl.get().t, 0.1, 100.0, pvMatrix);
 	mat4.rotateX(pvMatrix, Math.PI/2.0);
 	
-	// mat4.identity(mMatrix);
-	// gl.bindBuffer(gl.ARRAY_BUFFER, gridVertexPositionBuffer);
-	// gl.vertexAttribPointer(shaderProgramGrid.vertexPositionAttribute, gridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	// gl.uniformMatrix4fv(shaderProgramGrid.pvMatrixUniform, false, pvMatrix);
-	// gl.uniformMatrix4fv(shaderProgramGrid.mMatrixUniform, false, mMatrix);
-	// gl.uniform4fv(shaderProgramGrid.uColor, [1.0, 1.0, 1.0, 1.0]);
-	// gl.drawArrays(gl.LINES, 0, gridVertexPositionBuffer.numItems);
+	createTexture();
+	createObjects();
 	
-	for (var i in building.getItem()){
-		var item = building.getItem(i);
-		if (item === undefined) continue;
-		var	dx = item.x + item.lx * 0.5,
-			dz = item.z + item.lz * 0.5,
-			sx = item.lx * 0.5,
-			sz = item.lz * 0.5;
-		
-		if (item.type == 'door') {
-			var uColor = [1.0, 0.5, 0.0, 1.0];
-		} else {
-			var uColor = [1.0, 1.0, 0.7, 1.0];
-		}
-		
-		mat4.identity(mMatrix);
-		mat4.translate(mMatrix, [dx, -0.2, dz]);
-		mat4.scale(mMatrix, [sx, 1.0, sz]);
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
-		gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-		gl.uniform4fv(shaderProgram.uColor, uColor);
-		gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
-		
-		
-		
-		if (highlightedItems.has(item.id)) {
+	function createObjects() {
+		gl.useProgram(shaderProgram);
+		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		for (var i in building.getItem()){
+			var item = building.getItem(i);
+			if (item === undefined) continue;
+			var	dx = item.x + item.lx * 0.5,
+				dz = item.z + item.lz * 0.5,
+				sx = item.lx * 0.5,
+				sz = item.lz * 0.5;
+			
+			if (item.type == 'door') {
+				var uColor = [1.0, 0.5, 0.0, 1.0];
+			} else {
+				var uColor = [1.0, 1.0, 0.7, 1.0];
+			}
+			
 			mat4.identity(mMatrix);
-			mat4.translate(mMatrix, [dx, -0.1, dz]);
+			mat4.translate(mMatrix, [dx, -0.2, dz]);
 			mat4.scale(mMatrix, [sx, 1.0, sz]);
 			
-			gl.bindBuffer(gl.ARRAY_BUFFER, borderVertexPositionBuffer);
-			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, borderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 			gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
 			gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-			gl.uniform4fv(shaderProgram.uColor, Color.val);
-			gl.drawArrays(gl.LINE_STRIP, 0, borderVertexPositionBuffer.numItems);
+			gl.uniform4fv(shaderProgram.uColor, uColor);
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+			
+			if (highlightedItems.has(item.id)) {
+				mat4.identity(mMatrix);
+				mat4.translate(mMatrix, [dx, -0.1, dz]);
+				mat4.scale(mMatrix, [sx, 1.0, sz]);
+				
+				gl.bindBuffer(gl.ARRAY_BUFFER, borderVertexPositionBuffer);
+				gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, borderVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.uniformMatrix4fv(shaderProgram.pvMatrixUniform, false, pvMatrix);
+				gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
+				gl.uniform4fv(shaderProgram.uColor, Color.val);
+				gl.drawArrays(gl.LINE_STRIP, 0, borderVertexPositionBuffer.numItems);
+			}
 		}
+		gl.disableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+	}
+	
+	function createTexture() {			
+		gl.useProgram(shaderProgramTex);
+		gl.enableVertexAttribArray(shaderProgramTex.vertexPositionAttribute);
+		//gl.enableVertexAttribArray(shaderProgramTex.vertexTextureCoord);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexPositionBuffer);
+		gl.vertexAttribPointer(shaderProgramTex.vertexPositionAttribute, 4, gl.FLOAT, false, 4*5, 0);
+		//gl.vertexAttribPointer(shaderProgramTex.vertexTextureCoord, 2, gl.FLOAT, false, 4*5, 4*3);
+				
+		gl.uniformMatrix4fv(shaderProgramTex.pvMatrix, false, pvMatrix);
+		
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, neheTexture);
+		gl.uniform1i(shaderProgram.samplerUniform, 0);
+		
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		
+		gl.disableVertexAttribArray(shaderProgramTex.vertexPositionAttribute);
+		//gl.disableVertexAttribArray(shaderProgramTex.vertexTextureCoord);/**/
 	}
 }
 
@@ -249,6 +309,9 @@ function initScene(elem) {
 	// Слушает нажатия клавиш, возвращает код клавиши
 	key = new Keyboard();
 
+	// Установка цвета выделения по умолчанию
+	Color.val = color.TURQUOISE;
+	
 	var obj = {
 		selector: elem,
 		camera: cameraControl,

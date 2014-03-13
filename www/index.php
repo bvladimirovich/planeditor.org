@@ -44,6 +44,29 @@
     }
 </script>
 
+<script id="shader-fs-tex" type="x-shader/x-fragment">
+    precision mediump float;
+	uniform sampler2D uSampler;
+	varying vec2 vTextureCoord;
+	
+    void main(void) {
+		//gl_FragColor = texture2D(uSampler, vTextureCoord); 
+		gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    }
+</script>
+
+<script id="shader-vs-tex" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+	attribute vec2 aTextureCoord;
+    uniform mat4 uPVMatrix;
+	varying vec2 vTextureCoord;
+	
+    void main(void) {
+		vTextureCoord = aTextureCoord;
+        gl_Position = uPVMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
+
 <script id="shader-fs-grid" type="x-shader/x-fragment">
     precision mediump float;
 	uniform vec4 uColor;
@@ -68,13 +91,16 @@
     function webGLStart() {
         var canvas = document.getElementById("canvas");
         initGL(canvas);
+		
         initShaders();
         initBuffers();
-		initBuffersGrid();
 		initBuffersBorder();
+		initBuffersTexture();
+		
 		initScene(canvas);
 		initNavigation();
 		initMove();
+		initTexture()
     }
 </script>
 <style>

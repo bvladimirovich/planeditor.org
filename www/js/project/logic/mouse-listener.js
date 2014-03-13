@@ -50,9 +50,6 @@ function MouseListener(elem) {
 		// Коробка для хранения объектов, которые соединены с выбранным
 		var boxItems;
 		
-		// Установка цвета выделения по умолчанию
-		Color.val = color.TURQUOISE;
-		
 		// Функция обработки нажатия кнопки мыши
 		// ev - событие
 		this.mousedown = function (ev) {
@@ -69,7 +66,7 @@ function MouseListener(elem) {
 				prevZd = gl.viewportHeight - fs(ev, 'z');
 				moveCamera = true;
 			} else {
-				// Запоминается положение мыши в абсолютных координатах
+				// Определяется положение мыши в абсолютных координатах
 				// *Используются только в этой функции
 				var x = fs(ev, 'x')*(cameraControl.get().r-cameraControl.get().l)/gl.viewportWidth + cameraControl.get().l;
 				var	z = (gl.viewportWidth-fs(ev, 'z'))*(cameraControl.get().b-cameraControl.get().t)/gl.viewportHeight - cameraControl.get().b;
